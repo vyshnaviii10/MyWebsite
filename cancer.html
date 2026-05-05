@@ -1,0 +1,1626 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DermaScan – Interactive Skin Cancer Awareness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --bg:        #0f1923;
+  --bg2:       #162130;
+  --bg3:       #1c2d3f;
+  --surface:   #1e2f42;
+  --surface2:  #243548;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.14);
+
+  --mint:      #34d9b3;
+  --mint-dim:  rgba(52,217,179,0.15);
+  --mint-glow: rgba(52,217,179,0.35);
+  --coral:     #ff6b6b;
+  --coral-dim: rgba(255,107,107,0.15);
+  --amber:     #ffc94d;
+  --amber-dim: rgba(255,201,77,0.15);
+  --sky:       #5bc8f5;
+  --sky-dim:   rgba(91,200,245,0.15);
+  --rose:      #ff5e8e;
+
+  --text:      #e8f0f7;
+  --text-mid:  #8ba8bf;
+  --text-dim:  #4d6a80;
+
+  --radius:    16px;
+  --radius-sm: 10px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.35);
+  --shadow-lg: 0 20px 64px rgba(0,0,0,0.5);
+
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 8px; }
+
+/* ============================================================
+   TOPBAR NAV
+   ============================================================ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 60px;
+  background: rgba(15,25,35,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 32px;
+  gap: 20px;
+}
+.topbar-brand {
+  font-family: var(--font-head); font-weight: 800; font-size: 18px;
+  color: var(--text); text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.topbar-brand em {
+  font-style: normal; color: var(--mint);
+}
+.topbar-sep { flex: 1; }
+.topbar-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--mint-dim); color: var(--mint);
+  border: 1px solid rgba(52,217,179,0.3);
+  padding: 4px 12px; border-radius: 999px;
+}
+.topbar-back {
+  font-size: 13px; color: var(--text-mid); text-decoration: none;
+  display: flex; align-items: center; gap: 5px;
+  transition: color .2s;
+}
+.topbar-back:hover { color: var(--mint); }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 52vh;
+  padding: 100px 32px 64px;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 0%, rgba(52,217,179,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 10% 80%, rgba(255,107,107,0.05) 0%, transparent 60%),
+    var(--bg);
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+}
+.hero-inner {
+  max-width: 1100px; margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr auto; gap: 60px; align-items: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--mint); margin-bottom: 20px;
+}
+.hero-eyebrow::before {
+  content: ''; width: 24px; height: 2px;
+  background: var(--mint); border-radius: 2px;
+}
+.hero h1 {
+  font-family: var(--font-head); font-size: clamp(32px, 4.5vw, 54px);
+  font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: var(--text);
+}
+.hero h1 span { color: var(--mint); }
+.hero-desc {
+  font-size: 16px; color: var(--text-mid); max-width: 540px;
+  line-height: 1.75; margin-bottom: 36px; font-weight: 400;
+}
+.hero-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.hero-chip {
+  font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text-mid); text-decoration: none;
+  transition: all .2s; cursor: pointer;
+}
+.hero-chip:hover { border-color: var(--mint); color: var(--mint); background: var(--mint-dim); }
+
+.hero-stats {
+  display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;
+}
+.hero-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px; min-width: 160px;
+  text-align: center;
+  transition: border-color .3s;
+}
+.hero-stat-card:hover { border-color: var(--mint); }
+.hero-stat-num {
+  font-family: var(--font-head); font-size: 32px; font-weight: 800;
+  color: var(--mint); display: block; line-height: 1;
+}
+.hero-stat-card p { font-size: 11px; color: var(--text-mid); margin-top: 6px; font-weight: 500; }
+
+/* ============================================================
+   SECTION WRAPPER
+   ============================================================ */
+.page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; }
+
+.tool-section {
+  margin-bottom: 40px;
+  animation: fadeUp .5s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger delays */
+.tool-section:nth-child(1) { animation-delay: .05s; }
+.tool-section:nth-child(2) { animation-delay: .1s; }
+.tool-section:nth-child(3) { animation-delay: .15s; }
+.tool-section:nth-child(4) { animation-delay: .2s; }
+.tool-section:nth-child(5) { animation-delay: .25s; }
+.tool-section:nth-child(6) { animation-delay: .3s; }
+.tool-section:nth-child(7) { animation-delay: .35s; }
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  box-shadow: var(--shadow);
+  transition: border-color .3s;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.card-mint::before  { background: linear-gradient(90deg, var(--mint), #1ab8ee); }
+.card-coral::before { background: linear-gradient(90deg, var(--coral), var(--rose)); }
+.card-amber::before { background: linear-gradient(90deg, var(--amber), #ff9a3c); }
+.card-sky::before   { background: linear-gradient(90deg, var(--sky), #7b8fff); }
+.card-rose::before  { background: linear-gradient(90deg, var(--rose), var(--coral)); }
+.card-purple::before{ background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+
+.card-header {
+  display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px;
+}
+.card-icon {
+  width: 50px; height: 50px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.icon-mint   { background: var(--mint-dim); }
+.icon-coral  { background: var(--coral-dim); }
+.icon-amber  { background: var(--amber-dim); }
+.icon-sky    { background: var(--sky-dim); }
+.icon-rose   { background: rgba(255,94,142,0.15); }
+.icon-purple { background: rgba(167,139,250,0.15); }
+
+.card-header-text h2 {
+  font-family: var(--font-head); font-size: 20px; font-weight: 700;
+  color: var(--text); margin-bottom: 5px;
+}
+.card-header-text p { font-size: 13.5px; color: var(--text-mid); line-height: 1.6; }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field.full { grid-column: 1 / -1; }
+
+.field label {
+  font-size: 12px; font-weight: 700; color: var(--text-mid);
+  text-transform: uppercase; letter-spacing: .8px;
+}
+
+.field select,
+.field input[type="text"],
+.field input[type="number"] {
+  background: var(--bg3);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: var(--font-body); font-size: 14px;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px rgba(52,217,179,0.12);
+}
+
+/* Radio pills */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.rpill input { display: none; }
+
+.rpill label {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border2);
+  font-size: 13px; font-weight: 600;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all .2s;
+  user-select: none;
+  text-transform: none; letter-spacing: 0;
+}
+
+.rpill input:checked + label {
+  border-color: var(--mint);
+  background: var(--mint-dim);
+  color: var(--mint);
+}
+
+.rpill label:hover { border-color: var(--mint); color: var(--mint); }
+
+/* Yes/No pills */
+.yn-group { display: flex; gap: 8px; }
+.ynpill input { display: none; }
+.ynpill label {
+  padding: 7px 22px; border-radius: 999px;
+  border: 1.5px solid var(--border2);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; color: var(--text-mid);
+}
+.ynpill.yes input:checked + label  { border-color: var(--mint);  background: var(--mint-dim);  color: var(--mint); }
+.ynpill.no  input:checked + label  { border-color: var(--coral); background: var(--coral-dim); color: var(--coral); }
+.ynpill label:hover { border-color: currentColor; }
+
+/* Checkbox tiles */
+.check-tiles { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; }
+.ctile input { display: none; }
+.ctile label {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  font-size: 13px; font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: all .2s;
+  user-select: none;
+}
+.ctile label::before {
+  content: ''; width: 18px; height: 18px; border-radius: 5px;
+  border: 2px solid var(--border2); flex-shrink: 0; transition: all .2s;
+}
+.ctile input:checked + label {
+  border-color: var(--mint); background: var(--mint-dim); color: var(--mint);
+}
+.ctile input:checked + label::before {
+  background: var(--mint); border-color: var(--mint);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4l3.5 3.5L11 1' stroke='%230f1923' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 12px; background-position: center; background-repeat: no-repeat;
+}
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+.btn-submit {
+  margin-top: 24px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, var(--mint), #1ab8ee);
+  color: #0a1a12; font-family: var(--font-head); font-size: 14px; font-weight: 700;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  transition: all .25s; display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(52,217,179,0.3);
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(52,217,179,0.45); }
+.btn-submit:active { transform: translateY(0); }
+
+.btn-reset {
+  margin-top: 12px; margin-left: 12px;
+  padding: 14px 24px;
+  background: var(--surface2); color: var(--text-mid);
+  font-family: var(--font-head); font-size: 14px; font-weight: 600;
+  border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer;
+  transition: all .2s;
+}
+.btn-reset:hover { color: var(--text); border-color: var(--text-mid); }
+
+/* ============================================================
+   RESULT PANELS
+   ============================================================ */
+.result-panel {
+  margin-top: 28px;
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  display: none;
+  animation: resultReveal .4s ease;
+  border: 1.5px solid;
+}
+.result-panel.show { display: block; }
+
+@keyframes resultReveal {
+  from { opacity: 0; transform: scale(.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.result-low    { background: rgba(52,217,179,0.08);  border-color: rgba(52,217,179,0.4);  }
+.result-mod    { background: rgba(255,201,77,0.08);  border-color: rgba(255,201,77,0.4);  }
+.result-high   { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.4); }
+.result-warn   { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.4); }
+.result-ok     { background: rgba(52,217,179,0.08);  border-color: rgba(52,217,179,0.4);  }
+.result-info   { background: rgba(91,200,245,0.08);  border-color: rgba(91,200,245,0.4);  }
+
+.result-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 999px; margin-bottom: 14px;
+}
+.badge-low    { background: var(--mint-dim);  color: var(--mint);  border: 1px solid rgba(52,217,179,0.4); }
+.badge-mod    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,201,77,0.4); }
+.badge-high   { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(255,107,107,0.4); }
+.badge-warn   { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(255,107,107,0.4); }
+.badge-ok     { background: var(--mint-dim);  color: var(--mint);  border: 1px solid rgba(52,217,179,0.4); }
+.badge-info   { background: var(--sky-dim);   color: var(--sky);   border: 1px solid rgba(91,200,245,0.4); }
+
+.result-title {
+  font-family: var(--font-head); font-size: 20px; font-weight: 700;
+  margin-bottom: 10px; color: var(--text);
+}
+.result-panel p { font-size: 14px; color: var(--text-mid); line-height: 1.75; }
+.result-list { margin: 12px 0; padding-left: 0; list-style: none; }
+.result-list li {
+  font-size: 13.5px; color: var(--text-mid); padding: 6px 0;
+  display: flex; align-items: flex-start; gap: 10px; line-height: 1.6;
+}
+.result-list li::before {
+  content: '→'; flex-shrink: 0; font-weight: 700; margin-top: 2px;
+}
+.result-low .result-list li::before    { color: var(--mint); }
+.result-mod .result-list li::before    { color: var(--amber); }
+.result-high .result-list li::before   { color: var(--coral); }
+.result-warn .result-list li::before   { color: var(--coral); }
+.result-ok .result-list li::before     { color: var(--mint); }
+.result-info .result-list li::before   { color: var(--sky); }
+
+/* Score bar */
+.score-bar-wrap { margin: 20px 0 8px; }
+.score-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; font-weight: 700; color: var(--text-mid); margin-bottom: 8px;
+}
+.score-bar-track {
+  height: 10px; background: var(--bg3); border-radius: 999px; overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%; border-radius: 999px;
+  transition: width 1.2s cubic-bezier(.25,.8,.25,1);
+}
+.fill-mint  { background: linear-gradient(90deg, var(--mint), #1ab8ee); }
+.fill-amber { background: linear-gradient(90deg, var(--amber), #ff9a3c); }
+.fill-coral { background: linear-gradient(90deg, var(--coral), var(--rose)); }
+
+/* Big score display */
+.big-score {
+  display: flex; align-items: center; gap: 24px; margin: 16px 0;
+}
+.big-score-num {
+  font-family: var(--font-head); font-size: 56px; font-weight: 800; line-height: 1;
+}
+.big-score-info { flex: 1; }
+.big-score-info strong { display: block; font-size: 18px; margin-bottom: 4px; }
+.big-score-info span { font-size: 13px; color: var(--text-mid); }
+
+/* ============================================================
+   DERM ALERT CARD
+   ============================================================ */
+.derm-alert {
+  background: linear-gradient(135deg, rgba(255,107,107,0.12), rgba(255,94,142,0.08));
+  border: 1.5px solid rgba(255,107,107,0.4);
+  border-radius: var(--radius); padding: 28px 32px;
+  display: none;
+}
+.derm-alert.show { display: block; animation: resultReveal .4s ease; }
+.derm-alert-head {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+}
+.derm-alert-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: rgba(255,107,107,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.derm-alert-head h3 {
+  font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--coral);
+}
+.derm-alert-head p { font-size: 13px; color: var(--text-mid); }
+.derm-alert > p { font-size: 14px; color: var(--text-mid); line-height: 1.75; margin-bottom: 20px; }
+.btn-hospital {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--coral), var(--rose));
+  color: white; font-family: var(--font-head); font-size: 14px; font-weight: 700;
+  padding: 13px 28px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(255,107,107,0.35);
+  transition: all .25s;
+}
+
+/* ============================================================
+   QUIZ STYLES
+   ============================================================ */
+.quiz-progress-bar {
+  height: 4px; background: var(--bg3); border-radius: 999px;
+  margin-bottom: 28px; overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--mint), var(--sky));
+  border-radius: 999px; transition: width .4s ease;
+}
+
+.quiz-counter { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; font-weight: 600; }
+.quiz-question {
+  font-family: var(--font-head); font-size: 18px; font-weight: 700;
+  color: var(--text); margin-bottom: 22px; line-height: 1.45;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.qopt {
+  padding: 14px 18px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text-mid); font-size: 14px; font-weight: 600;
+  cursor: pointer; text-align: left; width: 100%;
+  font-family: var(--font-body);
+  transition: all .2s;
+}
+.qopt:hover:not(:disabled) { border-color: var(--sky); color: var(--sky); background: var(--sky-dim); }
+.qopt.correct { border-color: var(--mint); background: var(--mint-dim); color: var(--mint); }
+.qopt.wrong   { border-color: var(--coral); background: var(--coral-dim); color: var(--coral); }
+.quiz-feedback {
+  margin-top: 16px; padding: 14px 18px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; line-height: 1.6;
+  display: none;
+}
+.quiz-feedback.show { display: block; animation: fadeUp .3s ease; }
+.fb-correct { background: var(--mint-dim); color: var(--mint); border: 1px solid rgba(52,217,179,0.3); }
+.fb-wrong   { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(255,107,107,0.3); }
+.quiz-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 20px;
+}
+.quiz-nav-score { font-size: 13px; color: var(--text-dim); font-weight: 600; }
+.btn-next {
+  padding: 10px 22px; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text-mid); border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.btn-next:hover { border-color: var(--sky); color: var(--sky); }
+.quiz-final {
+  display: none; text-align: center; padding: 20px 0;
+}
+.quiz-final.show { display: block; animation: fadeUp .4s ease; }
+.quiz-final-score {
+  font-family: var(--font-head); font-size: 64px; font-weight: 800; color: var(--mint);
+  display: block; margin-bottom: 8px;
+}
+.quiz-final h3 { font-size: 22px; margin-bottom: 12px; color: var(--text); }
+.quiz-final p  { font-size: 15px; color: var(--text-mid); margin-bottom: 20px; }
+.btn-retake {
+  padding: 11px 26px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--mint); background: var(--mint-dim);
+  color: var(--mint); font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.btn-retake:hover { background: var(--mint); color: #0a1a12; }
+
+/* ============================================================
+   ABCDE VISUAL PILLS
+   ============================================================ */
+.abcde-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+.abcde-pill {
+  padding: 6px 16px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; letter-spacing: .5px;
+  border: 1.5px solid var(--border2); color: var(--text-dim);
+  transition: all .3s;
+}
+.abcde-pill.flagged { border-color: var(--coral); color: var(--coral); background: var(--coral-dim); }
+.abcde-pill.clear   { border-color: var(--mint);  color: var(--mint);  background: var(--mint-dim); }
+
+/* ============================================================
+   DISCLAIMER SECTION
+   ============================================================ */
+.disclaimer-card {
+  background: linear-gradient(135deg, rgba(255,201,77,0.07), rgba(255,107,107,0.05));
+  border: 1.5px solid rgba(255,201,77,0.3);
+  border-radius: var(--radius); padding: 32px 36px;
+  margin-top: 40px;
+}
+.disc-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.disc-head-icon {
+  width: 46px; height: 46px; background: var(--amber-dim);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.disc-head h2 { font-family: var(--font-head); font-size: 18px; color: var(--amber); }
+.disclaimer-card p { font-size: 14px; color: var(--text-mid); line-height: 1.8; margin-bottom: 10px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-stats  { flex-direction: row; flex-wrap: wrap; }
+  .hero-stat-card { min-width: 130px; flex: 1; }
+}
+@media (max-width: 640px) {
+  .topbar { padding: 0 16px; }
+  .hero   { padding: 80px 16px 48px; }
+  .page-wrap { padding: 0 16px 60px; }
+  .card  { padding: 24px 20px; }
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+  .big-score { flex-direction: column; text-align: center; }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  background: var(--bg2); border-top: 1px solid var(--border);
+  text-align: center; padding: 28px;
+  font-size: 12px; color: var(--text-dim);
+}
+.footer strong { color: var(--text-mid); }
+</style>
+</head>
+<body>
+
+<!-- ====================================================
+     TOPBAR
+     ==================================================== -->
+<nav class="topbar">
+  <a href="#" class="topbar-brand">🩺 Derma<em>Scan</em></a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-tag">Skin Awareness Suite</span>
+  <a href="dashboard.html" class="topbar-back">← Dashboard</a>
+</nav>
+
+<!-- ====================================================
+     HERO
+     ==================================================== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Interactive Awareness Tools</div>
+      <h1>Skin Cancer<br><span>Early Detection</span> Suite</h1>
+      <p class="hero-desc">Complete seven interactive assessments to evaluate your personal risk, understand ABCDE warning signs, and build life-saving skin protection habits. All tools are educational — not diagnostic.</p>
+      <div class="hero-chips">
+        <a href="#risk-form"      class="hero-chip">Risk Assessment</a>
+        <a href="#mole-tool"      class="hero-chip">Mole Checker</a>
+        <a href="#abcde-check"    class="hero-chip">ABCDE Questionnaire</a>
+        <a href="#tracker"        class="hero-chip">Daily Tracker</a>
+        <a href="#sun-tool"       class="hero-chip">UV Risk Tool</a>
+        <a href="#quiz-section"   class="hero-chip">Awareness Quiz</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-card">
+        <span class="hero-stat-num">1 in 5</span>
+        <p>Americans develop<br>skin cancer in lifetime</p>
+      </div>
+      <div class="hero-stat-card">
+        <span class="hero-stat-num">98%</span>
+        <p>Melanoma survival rate<br>when caught at Stage I</p>
+      </div>
+      <div class="hero-stat-card">
+        <span class="hero-stat-num">90%</span>
+        <p>Cases preventable<br>with UV protection</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PAGE CONTENT
+     ==================================================== -->
+<div class="page-wrap">
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 1 · RISK ASSESSMENT FORM
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="risk-form">
+    <div class="card card-mint">
+      <div class="card-header">
+        <div class="card-icon icon-mint">📋</div>
+        <div class="card-header-text">
+          <h2>Skin Cancer Risk Assessment</h2>
+          <p>Answer questions about your personal profile. We'll calculate your estimated risk level and provide tailored recommendations.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Age Group</label>
+          <select id="ra-age">
+            <option value="">Select your age group</option>
+            <option value="1">Under 20</option>
+            <option value="2">20 – 34</option>
+            <option value="3">35 – 49</option>
+            <option value="4">50 – 64</option>
+            <option value="5">65 and above</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Skin Type (Fitzpatrick Scale)</label>
+          <select id="ra-skin">
+            <option value="">Select skin type</option>
+            <option value="4">Type I – Very fair, always burns, never tans</option>
+            <option value="3">Type II – Fair, usually burns, tans slightly</option>
+            <option value="2">Type III – Medium, sometimes burns, tans uniformly</option>
+            <option value="1">Type IV – Olive, rarely burns, tans easily</option>
+            <option value="0">Type V/VI – Brown or dark, very rarely burns</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Family History of Skin Cancer</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="ra-family" id="rf-yes" value="3"><label for="rf-yes">Yes</label></div>
+            <div class="rpill"><input type="radio" name="ra-family" id="rf-no"  value="0"><label for="rf-no">No</label></div>
+            <div class="rpill"><input type="radio" name="ra-family" id="rf-unk" value="1"><label for="rf-unk">Unknown</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Ever Had a Severe Sunburn?</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="ra-burn" id="rb-many" value="3"><label for="rb-many">Multiple times</label></div>
+            <div class="rpill"><input type="radio" name="ra-burn" id="rb-once" value="2"><label for="rb-once">Once or twice</label></div>
+            <div class="rpill"><input type="radio" name="ra-burn" id="rb-never" value="0"><label for="rb-never">Never</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Average Daily Sun Exposure</label>
+          <select id="ra-sun">
+            <option value="">Select exposure level</option>
+            <option value="0">Minimal – mostly indoors</option>
+            <option value="1">Light – under 1 hour/day</option>
+            <option value="2">Moderate – 1–3 hours/day</option>
+            <option value="3">High – 3–6 hours/day</option>
+            <option value="4">Very High – 6+ hours/day</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Sunscreen Usage Frequency</label>
+          <select id="ra-spf">
+            <option value="">Select frequency</option>
+            <option value="0">Daily SPF 50+</option>
+            <option value="1">Daily SPF 30–50</option>
+            <option value="2">Only on sunny days</option>
+            <option value="3">Rarely or never</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Tanning Bed Usage</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="ra-tan" id="rt-reg"  value="4"><label for="rt-reg">Regularly</label></div>
+            <div class="rpill"><input type="radio" name="ra-tan" id="rt-occ"  value="2"><label for="rt-occ">Occasionally</label></div>
+            <div class="rpill"><input type="radio" name="ra-tan" id="rt-stop" value="1"><label for="rt-stop">Stopped using</label></div>
+            <div class="rpill"><input type="radio" name="ra-tan" id="rt-nev"  value="0"><label for="rt-nev">Never</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Number of Moles / Freckles</label>
+          <select id="ra-moles">
+            <option value="">Select approximate count</option>
+            <option value="0">Few (under 10)</option>
+            <option value="1">Some (10 – 25)</option>
+            <option value="2">Many (25 – 50)</option>
+            <option value="3">Very many (50+)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button class="btn-submit" onclick="calcRisk()">⚡ Calculate Risk Level</button>
+        <button class="btn-reset" onclick="resetTool('risk')">Reset</button>
+      </div>
+
+      <div class="result-panel" id="risk-result"></div>
+      <div class="derm-alert" id="risk-derm">
+        <div class="derm-alert-head">
+          <div class="derm-alert-icon">🏥</div>
+          <div>
+            <h3>Dermatologist Consultation Recommended</h3>
+            <p>Your assessment suggests elevated risk factors</p>
+          </div>
+        </div>
+        <p>Based on your profile, we strongly recommend scheduling a professional full-body skin examination with a board-certified dermatologist. Early professional evaluation can detect issues before they become serious.</p>
+        <a href="hospitals-nearby.html" class="btn-hospital">🏥 Find Hospitals Nearby</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 2 · MOLE OBSERVATION TOOL
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="mole-tool">
+    <div class="card card-coral">
+      <div class="card-header">
+        <div class="card-icon icon-coral">🔬</div>
+        <div class="card-header-text">
+          <h2>Mole Observation Tool</h2>
+          <p>Describe a specific mole or spot. The system evaluates your description against ABCDE clinical criteria and flags potential warning signs.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Approximate Size</label>
+          <select id="mo-size">
+            <option value="">Select estimated size</option>
+            <option value="0">Tiny – under 2mm (pin head)</option>
+            <option value="1">Small – 2–4mm</option>
+            <option value="2">Medium – 4–6mm (pencil eraser)</option>
+            <option value="3">Large – over 6mm ⚠️</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Color / Pigmentation</label>
+          <select id="mo-color">
+            <option value="">Select color description</option>
+            <option value="0">Uniform tan or light brown</option>
+            <option value="1">Uniform dark brown</option>
+            <option value="2">Multiple shades of brown ⚠️</option>
+            <option value="3">Black, red, white, or blue areas ⚠️</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Shape / Symmetry</label>
+          <select id="mo-shape">
+            <option value="">Select shape description</option>
+            <option value="0">Perfectly round and symmetric</option>
+            <option value="1">Slightly oval but symmetric</option>
+            <option value="2">Noticeably asymmetric ⚠️</option>
+            <option value="3">Clearly irregular and asymmetric ⚠️</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Border / Edge Appearance</label>
+          <select id="mo-border">
+            <option value="">Select border type</option>
+            <option value="0">Smooth, well-defined, clear edge</option>
+            <option value="1">Slightly uneven but contained</option>
+            <option value="2">Ragged, notched, or uneven ⚠️</option>
+            <option value="3">Blurred, spreading, or poorly defined ⚠️</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label>Recent Changes Observed</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="mo-change" id="mc-none" value="0"><label for="mc-none">No changes noted</label></div>
+            <div class="rpill"><input type="radio" name="mo-change" id="mc-size" value="2"><label for="mc-size">Growing in size</label></div>
+            <div class="rpill"><input type="radio" name="mo-change" id="mc-col"  value="2"><label for="mc-col">Color is changing</label></div>
+            <div class="rpill"><input type="radio" name="mo-change" id="mc-itch" value="2"><label for="mc-itch">Itching / bleeding</label></div>
+            <div class="rpill"><input type="radio" name="mo-change" id="mc-mult" value="3"><label for="mc-mult">Multiple changes</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button class="btn-submit" onclick="evalMole()">🔍 Evaluate This Mole</button>
+        <button class="btn-reset" onclick="resetTool('mole')">Reset</button>
+      </div>
+
+      <div class="result-panel" id="mole-result"></div>
+      <div class="derm-alert" id="mole-derm">
+        <div class="derm-alert-head">
+          <div class="derm-alert-icon">⚠️</div>
+          <div>
+            <h3>Suspicious Mole — Seek Medical Evaluation</h3>
+            <p>Your mole description matches multiple ABCDE warning criteria</p>
+          </div>
+        </div>
+        <p>The characteristics you described — including asymmetry, irregular borders, color variation, large size, or recent changes — are associated with moles that require professional examination. Please do not delay — see a dermatologist promptly. Early evaluation is the most effective protection.</p>
+        <a href="hospitals-nearby.html" class="btn-hospital">🏥 Find Hospitals Nearby</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 3 · ABCDE SELF CHECK QUESTIONNAIRE
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="abcde-check">
+    <div class="card card-amber">
+      <div class="card-header">
+        <div class="card-icon icon-amber">🔎</div>
+        <div class="card-header-text">
+          <h2>ABCDE Self-Check Questionnaire</h2>
+          <p>Work through each criterion of the clinical ABCDE rule. Answer honestly about any mole or skin spot you are monitoring.</p>
+        </div>
+      </div>
+
+      <div class="abcde-pills" id="abcde-pills">
+        <span class="abcde-pill" id="pill-A">A – Asymmetry</span>
+        <span class="abcde-pill" id="pill-B">B – Border</span>
+        <span class="abcde-pill" id="pill-C">C – Color</span>
+        <span class="abcde-pill" id="pill-D">D – Diameter</span>
+        <span class="abcde-pill" id="pill-E">E – Evolving</span>
+      </div>
+
+      <div style="display:grid;gap:16px;">
+
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:20px;">
+          <div style="font-size:13px;font-weight:800;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">A – Asymmetry</div>
+          <p style="font-size:14px;color:var(--text-mid);margin-bottom:14px;">If you draw a line through the middle of the mole, do the two halves look different from each other?</p>
+          <div class="yn-group">
+            <div class="ynpill yes"><input type="radio" name="ab-A" id="aA-y" value="1"><label for="aA-y">Yes</label></div>
+            <div class="ynpill no" ><input type="radio" name="ab-A" id="aA-n" value="0"><label for="aA-n">No</label></div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:20px;">
+          <div style="font-size:13px;font-weight:800;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">B – Border</div>
+          <p style="font-size:14px;color:var(--text-mid);margin-bottom:14px;">Are the edges of the mole irregular, ragged, notched, or poorly defined?</p>
+          <div class="yn-group">
+            <div class="ynpill yes"><input type="radio" name="ab-B" id="aB-y" value="1"><label for="aB-y">Yes</label></div>
+            <div class="ynpill no" ><input type="radio" name="ab-B" id="aB-n" value="0"><label for="aB-n">No</label></div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:20px;">
+          <div style="font-size:13px;font-weight:800;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">C – Color</div>
+          <p style="font-size:14px;color:var(--text-mid);margin-bottom:14px;">Does the mole have more than one color — different shades of brown, or any areas of black, red, white, or blue?</p>
+          <div class="yn-group">
+            <div class="ynpill yes"><input type="radio" name="ab-C" id="aC-y" value="1"><label for="aC-y">Yes</label></div>
+            <div class="ynpill no" ><input type="radio" name="ab-C" id="aC-n" value="0"><label for="aC-n">No</label></div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:20px;">
+          <div style="font-size:13px;font-weight:800;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">D – Diameter</div>
+          <p style="font-size:14px;color:var(--text-mid);margin-bottom:14px;">Is the mole larger than 6mm across — roughly the size of a pencil eraser or larger?</p>
+          <div class="yn-group">
+            <div class="ynpill yes"><input type="radio" name="ab-D" id="aD-y" value="1"><label for="aD-y">Yes</label></div>
+            <div class="ynpill no" ><input type="radio" name="ab-D" id="aD-n" value="0"><label for="aD-n">No</label></div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:20px;">
+          <div style="font-size:13px;font-weight:800;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">E – Evolving</div>
+          <p style="font-size:14px;color:var(--text-mid);margin-bottom:14px;">Has the mole changed in any way recently — size, shape, color, or symptoms like itching, bleeding, or crusting?</p>
+          <div class="yn-group">
+            <div class="ynpill yes"><input type="radio" name="ab-E" id="aE-y" value="1"><label for="aE-y">Yes</label></div>
+            <div class="ynpill no" ><input type="radio" name="ab-E" id="aE-n" value="0"><label for="aE-n">No</label></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+        <button class="btn-submit" onclick="evalABCDE()">📊 Evaluate ABCDE Results</button>
+        <button class="btn-reset" onclick="resetTool('abcde')">Reset</button>
+      </div>
+
+      <div class="result-panel" id="abcde-result"></div>
+      <div class="derm-alert" id="abcde-derm">
+        <div class="derm-alert-head">
+          <div class="derm-alert-icon">🚨</div>
+          <div>
+            <h3>ABCDE Warning Signs Detected</h3>
+            <p>One or more melanoma warning criteria flagged positive</p>
+          </div>
+        </div>
+        <p>Your responses indicate that this mole meets one or more criteria of the clinical ABCDE rule for melanoma detection. While this does not confirm cancer, it warrants immediate professional evaluation. Please consult a dermatologist — do not wait for scheduled appointments if you notice changes.</p>
+        <a href="hospitals-nearby.html" class="btn-hospital">🏥 Find Hospitals Nearby</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 4 · DAILY SKIN PROTECTION TRACKER
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="tracker">
+    <div class="card card-sky">
+      <div class="card-header">
+        <div class="card-icon icon-sky">🛡️</div>
+        <div class="card-header-text">
+          <h2>Daily Skin Protection Tracker</h2>
+          <p>Select all the skin protection habits you practiced today. Receive an instant Protection Score and personalized improvement tips.</p>
+        </div>
+      </div>
+
+      <div class="check-tiles">
+        <div class="ctile"><input type="checkbox" id="tr-01"><label for="tr-01">Applied SPF 30+ today</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-02"><label for="tr-02">Reapplied sunscreen (2h+)</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-03"><label for="tr-03">Wore protective clothing</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-04"><label for="tr-04">Wore a hat outdoors</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-05"><label for="tr-05">Wore UV-blocking sunglasses</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-06"><label for="tr-06">Avoided 10AM–4PM peak sun</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-07"><label for="tr-07">Sought shade when outdoors</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-08"><label for="tr-08">Did not use tanning bed</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-09"><label for="tr-09">Checked skin for new spots</label></div>
+        <div class="ctile"><input type="checkbox" id="tr-10"><label for="tr-10">Stayed well-hydrated</label></div>
+      </div>
+
+      <div>
+        <button class="btn-submit" onclick="calcTracker()">📈 Calculate Protection Score</button>
+        <button class="btn-reset" onclick="resetTool('tracker')">Reset</button>
+      </div>
+
+      <div class="result-panel" id="tracker-result"></div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 5 · SUN EXPOSURE RISK TOOL
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="sun-tool">
+    <div class="card card-rose">
+      <div class="card-header">
+        <div class="card-icon icon-rose">☀️</div>
+        <div class="card-header-text">
+          <h2>Sun Exposure Risk Calculator</h2>
+          <p>Describe your outdoor habits and sunscreen usage today. Get a UV risk rating and safety suggestions tailored to your inputs.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Time Spent Outdoors Today</label>
+          <select id="se-time">
+            <option value="">Select duration</option>
+            <option value="0">Under 30 minutes</option>
+            <option value="1">30 – 60 minutes</option>
+            <option value="2">1 – 2 hours</option>
+            <option value="3">2 – 4 hours</option>
+            <option value="4">More than 4 hours</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Peak Hour Exposure (10AM–4PM)</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="se-peak" id="sp-none" value="0"><label for="sp-none">None</label></div>
+            <div class="rpill"><input type="radio" name="se-peak" id="sp-some" value="1"><label for="sp-some">Under 1 hr</label></div>
+            <div class="rpill"><input type="radio" name="se-peak" id="sp-mod"  value="2"><label for="sp-mod">1–2 hrs</label></div>
+            <div class="rpill"><input type="radio" name="se-peak" id="sp-ext"  value="3"><label for="sp-ext">2+ hrs</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>SPF Applied Before Going Out?</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="se-spf" id="ss-50"   value="0"><label for="ss-50">Yes, SPF 50+</label></div>
+            <div class="rpill"><input type="radio" name="se-spf" id="ss-30"   value="1"><label for="ss-30">Yes, SPF 30–50</label></div>
+            <div class="rpill"><input type="radio" name="se-spf" id="ss-low"  value="2"><label for="ss-low">Low SPF only</label></div>
+            <div class="rpill"><input type="radio" name="se-spf" id="ss-none" value="3"><label for="ss-none">No sunscreen</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Did You Reapply Sunscreen?</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="se-reapply" id="sr-yes"  value="0"><label for="sr-yes">Yes, every 2 hours</label></div>
+            <div class="rpill"><input type="radio" name="se-reapply" id="sr-once" value="1"><label for="sr-once">Once only</label></div>
+            <div class="rpill"><input type="radio" name="se-reapply" id="sr-no"   value="2"><label for="sr-no">Not at all</label></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Outdoor Environment</label>
+          <select id="se-env">
+            <option value="">Select environment</option>
+            <option value="0">Urban / mostly shaded</option>
+            <option value="1">Suburban / mixed</option>
+            <option value="2">Open field or park</option>
+            <option value="3">Beach, water, or snow (reflective)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Protective Clothing Worn?</label>
+          <div class="radio-group">
+            <div class="rpill"><input type="radio" name="se-cloth" id="sc-full" value="0"><label for="sc-full">Full coverage</label></div>
+            <div class="rpill"><input type="radio" name="se-cloth" id="sc-part" value="1"><label for="sc-part">Partial coverage</label></div>
+            <div class="rpill"><input type="radio" name="se-cloth" id="sc-min"  value="2"><label for="sc-min">Minimal</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button class="btn-submit" onclick="calcSun()">☀️ Calculate UV Risk</button>
+        <button class="btn-reset" onclick="resetTool('sun')">Reset</button>
+      </div>
+
+      <div class="result-panel" id="sun-result"></div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       TOOL 6 · SKIN AWARENESS QUIZ
+       ────────────────────────────────────────────────── -->
+  <div class="tool-section" id="quiz-section">
+    <div class="card card-purple">
+      <div class="card-header">
+        <div class="card-icon icon-purple">🧠</div>
+        <div class="card-header-text">
+          <h2>Skin Awareness Knowledge Quiz</h2>
+          <p>Test your understanding of skin cancer prevention and early detection with 8 questions. Detailed explanations are provided for every answer.</p>
+        </div>
+      </div>
+
+      <div id="quiz-area">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="q-progbar" style="width:0%"></div>
+        </div>
+        <div class="quiz-counter" id="q-counter">Question 1 of 8</div>
+        <div class="quiz-question" id="q-text"></div>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <div class="quiz-nav">
+          <div class="quiz-nav-score" id="q-score-label">Score: 0 / 0</div>
+          <button class="btn-next" id="q-next-btn" onclick="quizNext()" style="display:none">Next →</button>
+        </div>
+      </div>
+
+      <div class="quiz-final" id="quiz-final">
+        <span class="quiz-final-score" id="qf-score">0/8</span>
+        <h3 id="qf-grade">Loading…</h3>
+        <p id="qf-msg"></p>
+        <button class="btn-retake" onclick="startQuiz()">↩ Retake Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────
+       EDUCATIONAL DISCLAIMER
+       ────────────────────────────────────────────────── -->
+  <div class="disclaimer-card">
+    <div class="disc-head">
+      <div class="disc-head-icon">⚠️</div>
+      <h2>Educational Disclaimer</h2>
+    </div>
+    <p><strong style="color:var(--text)">All tools on this page are for educational and awareness purposes only.</strong> They are not a substitute for professional medical advice, clinical diagnosis, or dermatological examination. Results from these assessments do not constitute a medical diagnosis of any kind.</p>
+    <p>Skin cancer can only be definitively diagnosed by a board-certified dermatologist or physician through physical examination and, where indicated, biopsy. If you have any concerns about your skin, or if any tool on this page flags a potential warning sign, please consult a qualified healthcare professional promptly.</p>
+    <p style="font-size:13px;color:var(--text-dim)">DermaScan is a health technology platform providing digital education resources. Use of these tools does not establish a patient-physician relationship. Always seek qualified medical advice for any health concern. Awareness tools last reviewed March 2025.</p>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<footer class="footer">
+  <strong>DermaScan</strong> · Interactive Skin Cancer Awareness Suite · For Educational Use Only &nbsp;|&nbsp;
+  Not a substitute for professional medical advice · © 2025 DermaScan Health Technology
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT — ALL TOOL LOGIC
+     ============================================================ -->
+<script>
+/* ============================================================
+   TOOL 1 — RISK ASSESSMENT
+   ============================================================ */
+function calcRisk() {
+  const age    = parseInt(document.getElementById('ra-age').value   || 0);
+  const skin   = parseInt(document.getElementById('ra-skin').value  || 0);
+  const sun    = parseInt(document.getElementById('ra-sun').value   || 0);
+  const spf    = parseInt(document.getElementById('ra-spf').value   || 0);
+  const moles  = parseInt(document.getElementById('ra-moles').value || 0);
+  const family = parseInt(getRadio('ra-family') || 0);
+  const burn   = parseInt(getRadio('ra-burn')   || 0);
+  const tan    = parseInt(getRadio('ra-tan')     || 0);
+
+  if (!document.getElementById('ra-age').value || !document.getElementById('ra-skin').value) {
+    flashBtn('Please select your Age Group and Skin Type to proceed.'); return;
+  }
+
+  const total = age + skin + sun + spf + moles + family + burn + tan;
+  const max   = 5 + 4 + 4 + 3 + 3 + 3 + 3 + 4; // 29
+  const pct   = Math.round((total / max) * 100);
+
+  let level, badge, cls, fill, title, recs;
+
+  if (pct <= 30) {
+    level = 'Low'; badge = 'badge-low'; cls = 'result-low'; fill = 'fill-mint';
+    title = 'Low Risk Profile';
+    recs = [
+      'Continue your current sun protection habits — they\'re working well.',
+      'Maintain daily SPF 30+ use, even on cloudy days and during winter.',
+      'Perform a monthly skin self-examination to track any changes.',
+      'Schedule a professional full-body skin exam every 1–2 years.',
+      'Avoid tanning beds entirely — there is no safe level of artificial UV exposure.'
+    ];
+  } else if (pct <= 60) {
+    level = 'Moderate'; badge = 'badge-mod'; cls = 'result-mod'; fill = 'fill-amber';
+    title = 'Moderate Risk Profile';
+    recs = [
+      'Upgrade to SPF 50+ broad-spectrum sunscreen applied every morning.',
+      'Reapply sunscreen every 2 hours during outdoor activity.',
+      'Wear wide-brimmed hats and UV-protective clothing when outdoors.',
+      'Avoid peak UV hours (10AM–4PM) for extended outdoor activities.',
+      'Schedule an annual professional skin check with a dermatologist.',
+      'If you use tanning beds, stop immediately — they significantly elevate risk.'
+    ];
+  } else {
+    level = 'High'; badge = 'badge-high'; cls = 'result-high'; fill = 'fill-coral';
+    title = 'Elevated Risk Profile';
+    recs = [
+      'Schedule a dermatologist appointment as soon as possible for a full-body skin assessment.',
+      'Use SPF 50+ daily and reapply every 90 minutes when outdoors.',
+      'Cover exposed skin with UPF-rated clothing, hat, and sunglasses every time you go outside.',
+      'Avoid all tanning beds — they are classified as a Group 1 carcinogen by the WHO.',
+      'Perform thorough monthly self-examinations using the ABCDE rule.',
+      'Your family history and/or skin type significantly increase your lifetime risk — proactive monitoring is essential.',
+      'Discuss genetic counseling options with your healthcare provider if multiple family members have had melanoma.'
+    ];
+    showDermAlert('risk-derm');
+  }
+
+  const bar = pct + '%';
+  document.getElementById('risk-result').innerHTML = `
+    <span class="result-badge ${badge}">● ${level} Risk</span>
+    <div class="result-title">${title}</div>
+    <div class="big-score">
+      <div class="big-score-num" style="color:var(--${level==='Low'?'mint':level==='Moderate'?'amber':'coral'})">${pct}%</div>
+      <div class="big-score-info">
+        <strong style="color:var(--text)">Risk Score: ${total} / ${max} factors</strong>
+        <span>Based on age, skin type, UV exposure, sunscreen habits, and medical history</span>
+      </div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-label"><span>Risk Level</span><span>${pct}%</span></div>
+      <div class="score-bar-track"><div class="score-bar-fill ${fill}" style="width:0%" id="rbar"></div></div>
+    </div>
+    <p style="margin:16px 0 8px;font-size:13px;font-weight:700;color:var(--text)">Personalised Recommendations:</p>
+    <ul class="result-list">${recs.map(r=>`<li>${r}</li>`).join('')}</ul>
+  `;
+  showPanel('risk-result', cls);
+  setTimeout(()=>{ const b=document.getElementById('rbar'); if(b) b.style.width=bar; }, 100);
+}
+
+/* ============================================================
+   TOOL 2 — MOLE OBSERVATION
+   ============================================================ */
+function evalMole() {
+  const size   = document.getElementById('mo-size').value;
+  const color  = document.getElementById('mo-color').value;
+  const shape  = document.getElementById('mo-shape').value;
+  const border = document.getElementById('mo-border').value;
+  const change = getRadio('mo-change');
+
+  if (!size || !color || !shape || !border) {
+    flashBtn('Please fill in all mole characteristics.'); return;
+  }
+
+  const score = parseInt(size) + parseInt(color) + parseInt(shape) + parseInt(border) + parseInt(change||0);
+  const flags = [];
+  if (parseInt(size)   >= 2) flags.push('D – Diameter ≥ 6mm');
+  if (parseInt(color)  >= 2) flags.push('C – Color variation');
+  if (parseInt(shape)  >= 2) flags.push('A – Asymmetry');
+  if (parseInt(border) >= 2) flags.push('B – Irregular border');
+  if (parseInt(change||0) >= 2) flags.push('E – Recent changes');
+
+  let badge, cls, title, recs;
+
+  if (score <= 2 && flags.length === 0) {
+    badge = 'badge-ok'; cls = 'result-ok'; title = 'Mole Characteristics Appear Within Normal Range';
+    recs = [
+      'Continue monthly self-examinations to track this mole over time.',
+      'Photograph the mole monthly (with a ruler for scale) and compare.',
+      'Consult a dermatologist if anything changes — even if it seems minor.',
+      'Show all moles to a dermatologist during your annual skin check.'
+    ];
+  } else if (score <= 5 && flags.length <= 1) {
+    badge = 'badge-mod'; cls = 'result-mod'; title = 'Some Characteristics Warrant Monitoring';
+    recs = [
+      `Flagged criteria: ${flags.join(', ')}.`,
+      'Monitor this mole carefully with weekly visual checks and monthly photography.',
+      'Do not attempt to treat or remove the mole yourself under any circumstances.',
+      'Book a dermatologist appointment within the next 4–6 weeks for evaluation.',
+      'Document all changes (size, color, sensation) to share with your doctor.'
+    ];
+  } else {
+    badge = 'badge-warn'; cls = 'result-warn'; title = 'Suspicious Mole — Prompt Medical Evaluation Needed';
+    recs = [
+      `Warning criteria detected: ${flags.join(', ')}.`,
+      'Multiple ABCDE criteria are flagged — this mole requires professional examination.',
+      'Do not delay — schedule a dermatologist appointment as soon as possible.',
+      'Avoid scratch, picking, or covering the mole with cosmetics.',
+      'Bring the DermaScan assessment summary to your appointment for reference.',
+      'If the mole is bleeding or rapidly changing, seek urgent medical care.'
+    ];
+    showDermAlert('mole-derm');
+  }
+
+  document.getElementById('mole-result').innerHTML = `
+    <span class="result-badge ${badge}">${score <= 2 ? '✓ Normal Range' : score <= 5 ? '⚠ Monitor' : '🚨 Suspicious'}</span>
+    <div class="result-title">${title}</div>
+    ${flags.length ? `<p style="font-size:13px;margin-bottom:12px;"><strong style="color:var(--text)">ABCDE flags raised:</strong> <span style="color:var(--coral)">${flags.join(' · ')}</span></p>` : ''}
+    <ul class="result-list">${recs.map(r=>`<li>${r}</li>`).join('')}</ul>
+  `;
+  showPanel('mole-result', cls);
+}
+
+/* ============================================================
+   TOOL 3 — ABCDE QUESTIONNAIRE
+   ============================================================ */
+function evalABCDE() {
+  const A = getRadio('ab-A');
+  const B = getRadio('ab-B');
+  const C = getRadio('ab-C');
+  const D = getRadio('ab-D');
+  const E = getRadio('ab-E');
+
+  if ([A,B,C,D,E].some(v => v === null)) {
+    flashBtn('Please answer all five ABCDE questions.'); return;
+  }
+
+  const results = {A, B, C, D, E};
+  const letters = ['A','B','C','D','E'];
+  const names = {A:'Asymmetry', B:'Border', C:'Color', D:'Diameter', E:'Evolving'};
+
+  letters.forEach(l => {
+    const pill = document.getElementById('pill-'+l);
+    pill.classList.remove('flagged','clear');
+    pill.classList.add(parseInt(results[l]) === 1 ? 'flagged' : 'clear');
+  });
+
+  const flagged = letters.filter(l => parseInt(results[l]) === 1);
+  const count   = flagged.length;
+
+  let badge, cls, title, msg, recs;
+
+  if (count === 0) {
+    badge = 'badge-ok'; cls = 'result-ok'; title = 'No ABCDE Warning Signs Detected';
+    msg = 'None of the five clinical ABCDE melanoma criteria were flagged for this mole. This is a reassuring result. However, continue monitoring regularly.';
+    recs = [
+      'Continue monthly self-examinations using the ABCDE rule.',
+      'Photograph this mole monthly with a ruler for scale comparison.',
+      'Any single criterion developing in future warrants a dermatologist visit.',
+      'Schedule an annual skin check with a dermatologist regardless of current findings.'
+    ];
+  } else if (count <= 2) {
+    badge = 'badge-mod'; cls = 'result-mod'; title = `${count} ABCDE Criterion ${count===1?'Flagged':'Criteria Flagged'} — Monitor Closely`;
+    msg = `Flagged: ${flagged.map(l=>`${l} (${names[l]})`).join(', ')}. One to two criteria may still represent a benign mole, but professional evaluation is advisable.`;
+    recs = [
+      `The following criteria were flagged: ${flagged.map(l=>names[l]).join(', ')}.`,
+      'Monitor weekly for any further changes to any of the five criteria.',
+      'Seek a dermatologist appointment within 4–6 weeks.',
+      'Do not self-treat or remove the mole — always have a professional evaluate it.',
+      'Take clear, well-lit photographs of the mole to track any evolution.'
+    ];
+  } else {
+    badge = 'badge-warn'; cls = 'result-warn'; title = `${count} ABCDE Criteria Flagged — Urgent Evaluation Recommended`;
+    msg = `Flagged: ${flagged.map(l=>`${l} (${names[l]})`).join(', ')}. Meeting ${count} or more ABCDE criteria is a significant clinical indicator warranting prompt professional assessment.`;
+    recs = [
+      `Criteria flagged (${count}/5): ${flagged.map(l=>names[l]).join(', ')}.`,
+      'Seeing a dermatologist promptly is strongly advised — do not delay.',
+      'Three or more positive criteria significantly elevate clinical concern.',
+      'Keep the mole uncovered and undisturbed until your appointment.',
+      'If you notice any bleeding, rapid growth, or new symptoms, seek urgent care.',
+      'Bring a record of when you first noticed the mole and any changes observed.'
+    ];
+    showDermAlert('abcde-derm');
+  }
+
+  document.getElementById('abcde-result').innerHTML = `
+    <span class="result-badge ${badge}">ABCDE: ${count}/5 flagged</span>
+    <div class="result-title">${title}</div>
+    <p style="margin-bottom:14px;">${msg}</p>
+    <ul class="result-list">${recs.map(r=>`<li>${r}</li>`).join('')}</ul>
+  `;
+  showPanel('abcde-result', cls);
+}
+
+/* ============================================================
+   TOOL 4 — DAILY TRACKER
+   ============================================================ */
+function calcTracker() {
+  const ids = ['tr-01','tr-02','tr-03','tr-04','tr-05','tr-06','tr-07','tr-08','tr-09','tr-10'];
+  const checked = ids.filter(id => document.getElementById(id).checked).length;
+  const pct = Math.round((checked / ids.length) * 100);
+  const bar = pct + '%';
+
+  let badge, cls, fill, title, msg, tips;
+
+  if (pct >= 80) {
+    badge='badge-ok'; cls='result-ok'; fill='fill-mint'; title='Excellent Protection Today! 🏆';
+    msg = `Outstanding! You completed ${checked}/10 skin protection habits today. You are providing strong, comprehensive protection for your skin.`;
+    tips = ['Keep up this excellent routine — consistency is the key to long-term protection.','Share your habits with family and friends to encourage healthy skin practices.','Consider an annual professional skin check to complement your great daily habits.'];
+  } else if (pct >= 50) {
+    badge='badge-mod'; cls='result-mod'; fill='fill-amber'; title='Good Start — Room to Improve';
+    msg = `You completed ${checked}/10 habits today. You\'re on the right track, but a few key habits are missing from your daily routine.`;
+    const missing = ids.filter(id=>!document.getElementById(id).checked);
+    const labels = {'tr-01':'Apply SPF 30+ every morning','tr-02':'Reapply sunscreen every 2 hours outdoors','tr-03':'Wear long-sleeved protective clothing','tr-04':'Wear a wide-brimmed hat outdoors','tr-05':'Use UV-blocking sunglasses','tr-06':'Avoid direct sun between 10AM and 4PM','tr-07':'Seek shade during outdoor time','tr-08':'Avoid tanning beds entirely','tr-09':'Inspect skin for new or changed spots','tr-10':'Drink adequate water throughout the day'};
+    tips = missing.slice(0,4).map(id=>`Add today: ${labels[id]}`);
+  } else {
+    badge='badge-high'; cls='result-high'; fill='fill-coral'; title='Low Protection Level Today';
+    msg = `Only ${checked}/10 protection habits completed. Your skin had limited protection today. Consistent daily habits are your best defence against UV damage.`;
+    tips = ['Start tomorrow with SPF 50+ applied before leaving home — this one habit makes the biggest difference.','Set phone reminders to reapply sunscreen every 2 hours when outdoors.','Buy a wide-brimmed sun hat and keep it near your door as a daily reminder.','Gradually build all 10 habits — start with 3 and add one new habit each week.'];
+  }
+
+  document.getElementById('tracker-result').innerHTML = `
+    <span class="result-badge ${badge}">${pct}% Protection Score</span>
+    <div class="result-title">${title}</div>
+    <div class="big-score">
+      <div class="big-score-num" style="color:var(--${pct>=80?'mint':pct>=50?'amber':'coral'})">${checked}<span style="font-size:28px;opacity:.5">/10</span></div>
+      <div class="big-score-info">
+        <strong style="color:var(--text)">${pct}% of habits completed today</strong>
+        <span>Each habit reduces your cumulative UV damage risk</span>
+      </div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-label"><span>Daily Protection Score</span><span>${pct}%</span></div>
+      <div class="score-bar-track"><div class="score-bar-fill ${fill}" style="width:0%" id="tbar"></div></div>
+    </div>
+    <p style="margin:14px 0 8px;">${msg}</p>
+    <ul class="result-list">${tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+  `;
+  showPanel('tracker-result', cls);
+  setTimeout(()=>{ const b=document.getElementById('tbar'); if(b) b.style.width=bar; }, 100);
+}
+
+/* ============================================================
+   TOOL 5 — SUN EXPOSURE RISK
+   ============================================================ */
+function calcSun() {
+  const time    = document.getElementById('se-time').value;
+  const env     = document.getElementById('se-env').value;
+  const peak    = getRadio('se-peak');
+  const spf     = getRadio('se-spf');
+  const reapply = getRadio('se-reapply');
+  const cloth   = getRadio('se-cloth');
+
+  if (!time || !env) {
+    flashBtn('Please select at least time outdoors and environment.'); return;
+  }
+
+  const score = parseInt(time||0) + parseInt(env||0) + parseInt(peak||0) + parseInt(spf||0) + parseInt(reapply||0) + parseInt(cloth||0);
+  const max = 4 + 3 + 3 + 3 + 2 + 2; // 17
+  const pct = Math.round((score / max) * 100);
+  const bar = pct + '%';
+
+  let badge, cls, fill, level, recs;
+
+  if (pct <= 25) {
+    badge='badge-ok'; cls='result-ok'; fill='fill-mint'; level='Low UV Risk';
+    recs=['Your sun protection today was excellent. Minimal UV risk accumulated.','Continue applying SPF even on low-exposure days — cumulative damage builds over decades.','Well done for wearing protective clothing and limiting peak-hour exposure.'];
+  } else if (pct <= 55) {
+    badge='badge-mod'; cls='result-mod'; fill='fill-amber'; level='Moderate UV Risk';
+    recs=['Apply after-sun moisturiser this evening to support skin recovery.','Tomorrow, upgrade to SPF 50+ and reapply every 2 hours if outdoors.','Wear a hat and protective clothing to reduce direct skin exposure.','Avoid extended outdoor time between 10AM and 4PM — seek shade when possible.'];
+  } else if (pct <= 75) {
+    badge='badge-high'; cls='result-high'; fill='fill-coral'; level='High UV Risk';
+    recs=['Your skin received significant UV exposure today. Apply a soothing, hydrating after-sun product.','Drink extra water — dehydration worsens skin damage from UV radiation.','Use SPF 50+ with reapplication every 90 minutes on future high-exposure days.','Wear full-coverage UPF clothing, hat, and sunglasses. Seek shade actively.','If you notice any unusual redness, blistering, or moles that seem affected — consult a doctor.'];
+  } else {
+    badge='badge-warn'; cls='result-warn'; fill='fill-coral'; level='Very High UV Risk — Action Required';
+    recs=['You had very high UV exposure today with limited protection — immediate skin care is important.','Apply a rich, calming after-sun lotion with aloe vera or ceramides immediately.','Stay well-hydrated and monitor your skin over the next 24–48 hours for burns or reactions.','On future days with this exposure level: SPF 50+, full UPF clothing, hat, sunglasses, and shade are all essential.','If sunburn develops with blistering, swelling, or fever — seek medical attention promptly.','Long-term: reduce peak-hour exposure and never go without broad-spectrum sunscreen.'];
+  }
+
+  document.getElementById('sun-result').innerHTML = `
+    <span class="result-badge ${badge}">☀️ ${level}</span>
+    <div class="result-title">UV Exposure Risk: ${pct}% of Maximum</div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-label"><span>UV Risk Score</span><span>${pct}%</span></div>
+      <div class="score-bar-track"><div class="score-bar-fill ${fill}" style="width:0%" id="sbar"></div></div>
+    </div>
+    <ul class="result-list">${recs.map(r=>`<li>${r}</li>`).join('')}</ul>
+  `;
+  showPanel('sun-result', cls);
+  setTimeout(()=>{ const b=document.getElementById('sbar'); if(b) b.style.width=bar; }, 100);
+}
+
+/* ============================================================
+   TOOL 6 — QUIZ ENGINE
+   ============================================================ */
+const quizQuestions = [
+  {
+    q: "What does the 'D' in the ABCDE melanoma detection rule stand for?",
+    opts: ["Darkness of pigmentation","Depth of the lesion","Diameter greater than 6mm","Dryness of skin around the mole"],
+    ans: 2,
+    exp: "Correct! 'D' stands for Diameter — any mole larger than 6mm (the size of a pencil eraser) is a warning sign. However, melanomas can also be smaller when first detected, so all ABCDE criteria should be evaluated together."
+  },
+  {
+    q: "How much does using tanning beds before age 35 increase melanoma risk?",
+    opts: ["About 10–15%","About 30–35%","About 59%","About 80–90%"],
+    ans: 2,
+    exp: "Correct! Research shows a 59% increase in melanoma risk for people who use tanning beds before age 35. The WHO classifies tanning devices as Group 1 carcinogens — the same category as tobacco smoke and asbestos."
+  },
+  {
+    q: "What is the minimum SPF recommended for everyday use by dermatologists?",
+    opts: ["SPF 10","SPF 15","SPF 30","SPF 75"],
+    ans: 2,
+    exp: "Correct! Dermatologists recommend a minimum of SPF 30, which blocks about 97% of UVB rays. SPF 50+ provides marginally more protection (~98%) and is preferred for extended outdoor activity. Broad-spectrum coverage (UVA + UVB) is essential."
+  },
+  {
+    q: "Skin cancer can only develop on areas of skin that are regularly exposed to the sun.",
+    opts: ["True — only sun-exposed skin is at risk","False — it can develop anywhere on the body","True, but only in fair-skinned individuals","False, but only in very rare cases"],
+    ans: 1,
+    exp: "Correct! Skin cancer — especially melanoma — can develop anywhere, including between the toes, under toenails, on the scalp, in the groin, and even in the eyes and on internal mucous membranes. Never assume covered skin is safe."
+  },
+  {
+    q: "At which stage does melanoma have the best survival rate?",
+    opts: ["Stage IV — once widely spread","Stage III — regional lymph node involvement","Stage II — deeper but localized","Stage I — thin, localized melanoma"],
+    ans: 3,
+    exp: "Correct! Stage I melanoma carries a 5-year survival rate of approximately 98% when caught early. By Stage IV, when it has spread to distant organs, the rate falls to around 28%. Early detection saves lives — perform monthly self-checks."
+  },
+  {
+    q: "Clouds and overcast skies block most UV radiation, making sunscreen unnecessary.",
+    opts: ["True — clouds absorb most UV","True — only on very cloudy days","False — up to 80% of UV penetrates cloud cover","False — but only UVA rays penetrate clouds"],
+    ans: 2,
+    exp: "Correct! Up to 80% of UV radiation can penetrate clouds, meaning significant UV exposure occurs even on overcast days. Additionally, UVA rays — which cause aging and contribute to cancer — pass through glass. SPF should be applied daily, 365 days a year."
+  },
+  {
+    q: "Which type of skin cancer is the most life-threatening?",
+    opts: ["Basal Cell Carcinoma","Squamous Cell Carcinoma","Melanoma","Merkel Cell Carcinoma"],
+    ans: 2,
+    exp: "Correct! Melanoma accounts for only ~5% of skin cancer cases but causes the majority of skin cancer deaths due to its high potential to metastasize (spread) to distant organs. Early detection is critical — the ABCDE rule exists specifically to catch melanoma early."
+  },
+  {
+    q: "How often should people at standard risk perform a full-body skin self-examination?",
+    opts: ["Once a year is sufficient","Every 6 months","Monthly","Only when a mole changes"],
+    ans: 2,
+    exp: "Correct! Monthly self-examinations are recommended so you can quickly detect any new or changing moles. Between professional visits, regular self-checks are your primary defence. Photograph moles for month-to-month comparison."
+  }
+];
+
+let qCurrent = 0, qScore = 0, qAnswered = false;
+
+function startQuiz() {
+  qCurrent = 0; qScore = 0; qAnswered = false;
+  document.getElementById('quiz-final').classList.remove('show');
+  document.getElementById('quiz-area').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[qCurrent];
+  const pct = (qCurrent / quizQuestions.length) * 100;
+  document.getElementById('q-progbar').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Question ${qCurrent + 1} of ${quizQuestions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-score-label').textContent = `Score: ${qScore} / ${qCurrent}`;
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('q-feedback').textContent = '';
+  document.getElementById('q-next-btn').style.display = 'none';
+  qAnswered = false;
+
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'qopt';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(i, btn);
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuiz(idx, btn) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const q = quizQuestions[qCurrent];
+  const all = document.querySelectorAll('.qopt');
+  all.forEach(b => b.disabled = true);
+
+  const correct = idx === q.ans;
+  if (correct) { btn.classList.add('correct'); qScore++; }
+  else { btn.classList.add('wrong'); all[q.ans].classList.add('correct'); }
+
+  const fb = document.getElementById('q-feedback');
+  fb.textContent = (correct ? '✓ ' : '✗ ') + q.exp;
+  fb.className = 'quiz-feedback show ' + (correct ? 'fb-correct' : 'fb-wrong');
+
+  document.getElementById('q-score-label').textContent = `Score: ${qScore} / ${qCurrent + 1}`;
+  document.getElementById('q-next-btn').style.display = 'inline-block';
+  document.getElementById('q-next-btn').textContent = qCurrent + 1 < quizQuestions.length ? 'Next →' : 'See Results →';
+}
+
+function quizNext() {
+  qCurrent++;
+  if (qCurrent < quizQuestions.length) {
+    renderQuestion();
+  } else {
+    showQuizFinal();
+  }
+}
+
+function showQuizFinal() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const pct = Math.round((qScore / quizQuestions.length) * 100);
+  let grade, msg;
+  if (pct >= 87) { grade = 'Outstanding Knowledge! 🏆'; msg = 'Excellent! You have a strong, accurate understanding of skin cancer prevention and early detection. Your knowledge could genuinely help you and others catch skin cancer early.'; }
+  else if (pct >= 62) { grade = 'Good Foundation 👍'; msg = 'Well done! You understand the basics. Review the questions you missed to fill in any gaps — every piece of knowledge contributes to early detection awareness.'; }
+  else if (pct >= 37) { grade = 'Building Awareness 📚'; msg = 'You\'re developing your knowledge. We recommend reading through the awareness sections of this page and retaking the quiz to strengthen your understanding.'; }
+  else { grade = 'Keep Learning 🌱'; msg = 'Skin cancer awareness is learned — not innate. Review the ABCDE guide, risk factor information, and prevention tips on this page, then retake the quiz. Your knowledge can save a life.'; }
+
+  document.getElementById('qf-score').textContent = `${qScore}/${quizQuestions.length}`;
+  document.getElementById('qf-grade').textContent = grade;
+  document.getElementById('qf-msg').textContent = msg;
+  document.getElementById('q-progbar').style.width = '100%';
+  document.getElementById('quiz-final').classList.add('show');
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function getRadio(name) {
+  const sel = document.querySelector(`input[name="${name}"]:checked`);
+  return sel ? sel.value : null;
+}
+
+function showPanel(id, cls) {
+  const el = document.getElementById(id);
+  el.className = 'result-panel ' + cls + ' show';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showDermAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+
+function flashBtn(msg) { alert(msg); }
+
+function resetTool(tool) {
+  const maps = {
+    risk:    { selects: ['ra-age','ra-skin','ra-sun','ra-spf','ra-moles'], radios: ['ra-family','ra-burn','ra-tan'], result: 'risk-result',    derm: 'risk-derm' },
+    mole:    { selects: ['mo-size','mo-color','mo-shape','mo-border'],     radios: ['mo-change'],                   result: 'mole-result',    derm: 'mole-derm' },
+    abcde:   { selects: [],                                                 radios: ['ab-A','ab-B','ab-C','ab-D','ab-E'], result: 'abcde-result', derm: 'abcde-derm' },
+    tracker: { selects: [], radios: [], checks: ['tr-01','tr-02','tr-03','tr-04','tr-05','tr-06','tr-07','tr-08','tr-09','tr-10'], result: 'tracker-result', derm: null },
+    sun:     { selects: ['se-time','se-env'],                               radios: ['se-peak','se-spf','se-reapply','se-cloth'], result: 'sun-result', derm: null }
+  };
+  const m = maps[tool];
+  if (!m) return;
+  (m.selects||[]).forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  (m.radios||[]).forEach(n  => { document.querySelectorAll(`input[name="${n}"]`).forEach(r=>r.checked=false); });
+  (m.checks||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
+  const res = document.getElementById(m.result);
+  if (res) { res.className='result-panel'; res.innerHTML=''; }
+  if (m.derm) { const d=document.getElementById(m.derm); if(d) d.classList.remove('show'); }
+  if (tool === 'abcde') { document.querySelectorAll('.abcde-pill').forEach(p=>{ p.classList.remove('flagged','clear'); }); }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+startQuiz();
+</script>
+</body>
+</html>

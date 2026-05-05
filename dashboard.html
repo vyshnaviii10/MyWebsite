@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system;
+    background: linear-gradient(120deg, #eef9fd, #ffffff);
+}
+
+/* Header */
+.header {
+    padding: 22px;
+    text-align: center;
+    background: linear-gradient(90deg,#0a5c75,#0f7fa0);
+    color: white;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+}
+
+/* Dashboard grid (3 cards top, 2 bottom) */
+.dashboard {
+    max-width: 900px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 35px;
+    padding: 50px 30px 80px;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(10,92,117,0.08), transparent);
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 50px rgba(0,0,0,0.12);
+}
+
+.card img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.card h3 {
+    color: #0a5c75;
+    font-size: 19px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.card p {
+    color: #555;
+    font-size: 14.5px;
+    line-height: 1.5;
+}
+
+/* Floating SkinBot */
+.skinbot {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 75px;
+    height: 75px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+    transition: 0.3s ease;
+}
+
+.skinbot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.skinbot:hover {
+    transform: scale(1.12);
+}
+
+/* Mobile view */
+@media (max-width: 700px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    Welcome to DermaScan – Your Skin Health Dashboard
+</div>
+
+<div class="dashboard">
+
+    <a href="scan.html" style="text-decoration:none;">
+        <div class="card">
+            <img src="https://i.pinimg.com/1200x/7e/d3/ef/7ed3ef087673b20f73a58913ed73cc4e.jpg">
+            <h3>Scan My Skin</h3>
+            <p>Upload a photo and detect skin risk early.</p>
+        </div>
+    </a>
+
+    <a href="skin_safety.html" style="text-decoration:none;">
+        <div class="card">
+            <img src="https://i.pinimg.com/736x/00/94/9c/00949c5553367e75cb334886bb55c415.jpg">
+            <h3>Learn About Your Skin</h3>
+            <p>Understand rashes, allergies, and simple care tips.</p>
+        </div>
+    </a>
+
+    <a href="weather_skin.html" style="text-decoration:none;">
+        <div class="card">
+            <img src="https://i.pinimg.com/1200x/0b/a6/f5/0ba6f5185c6619bec2ff5ca7e8b86a25.jpg">
+            <h3>Weather & Skin</h3>
+            <p>See how sun, dust & climate affect you.</p>
+        </div>
+    </a>
+
+    <a href="hospitals.html" style="text-decoration:none;">
+        <div class="card">
+            <img src="https://i.pinimg.com/736x/f3/c0/c9/f3c0c94c1bb598018072f70cf9c2be60.jpg">
+            <h3>Hospitals Nearby</h3>
+            <p>Find dermatologists near you.</p>
+        </div>
+    </a>
+
+    <a href="cancer.html" style="text-decoration:none;">
+        <div class="card">
+            <img src="https://i.pinimg.com/736x/bc/e6/e7/bce6e755a82adea04f111840a0ee8d62.jpg">
+            <h3>Skin Cancer Awareness</h3>
+            <p>Learn early signs, prevention tips, and when to consult a dermatologist.</p>
+        </div>
+    </a>
+
+</div>
+
+<div class="skinbot" onclick="openChatbot()">
+    <img src="https://i.pinimg.com/736x/1e/b0/5f/1eb05f325ec50a15c8b045f3428d6d5e.jpg">
+</div>
+
+<script>
+function openChatbot() {
+    window.location.href = "chatbot.html";
+}
+</script>
+
+</body>
+</html>

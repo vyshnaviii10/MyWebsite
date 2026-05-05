@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan AI – Smart Skin Safety</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #87ceeb 0%, #b0e0e6 100%);
+    padding: 40px 20px;
+    color: #1f2937;
+}
+
+/* ---------- Container ---------- */
+.container {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* ---------- Header ---------- */
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    font-size: 44px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.header p {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* ---------- Glass Card ---------- */
+.glass {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    border-radius: 22px;
+    padding: 35px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+    margin-bottom: 30px;
+}
+
+/* ---------- Form ---------- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.form-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section h4 {
+    margin: 0 0 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+}
+
+select, input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: #f9fafb;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+input[type="range"] {
+    cursor: pointer;
+    padding: 0;
+    height: auto;
+}
+
+.slider-value {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+button {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(74, 144, 226, 0.4);
+}
+
+button.secondary {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+/* ---------- Result Layout ---------- */
+.result-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Score Ring ---------- */
+.score-card {
+    text-align: center;
+}
+
+.score-ring {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: conic-gradient(#667eea 0deg, #e5e7eb 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    position: relative;
+}
+
+.score-inner {
+    width: 135px;
+    height: 135px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.score-inner span {
+    font-size: 38px;
+}
+
+.score-inner small {
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+/* ---------- Risk Badge ---------- */
+.risk {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-top: 16px;
+}
+
+.low { background: #dcfce7; color: #166534; }
+.medium { background: #fef3c7; color: #92400e; }
+.high { background: #fee2e2; color: #991b1b; }
+
+/* ---------- Alert System ---------- */
+.alert {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border-left: 4px solid;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.alert-info {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+/* ---------- Severity Indicator ---------- */
+.severity-indicator {
+    background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+    height: 6px;
+    border-radius: 10px;
+    margin: 12px 0;
+    position: relative;
+}
+
+.severity-marker {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    border: 3px solid #1f2937;
+    position: absolute;
+    top: -5px;
+    left: 0;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    box-shadow: none;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---------- Info Cards ---------- */
+.info-card {
+    background: #f9fafb;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border-left: 6px solid #667eea;
+}
+
+.info-card h3 {
+    margin: 0 0 12px;
+}
+
+.info-card ul {
+    padding-left: 18px;
+}
+
+.info-card li {
+    margin-bottom: 8px;
+}
+
+/* ---------- Vitamin Deficiency Cards ---------- */
+.vitamin-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.vitamin-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 5px;
+    border-radius: 5px 0 0 5px;
+}
+
+.vitamin-card.vit-a::before { background: #f97316; }
+.vitamin-card.vit-b::before { background: #8b5cf6; }
+.vitamin-card.vit-c::before { background: #f59e0b; }
+.vitamin-card.vit-d::before { background: #eab308; }
+.vitamin-card.vit-e::before { background: #10b981; }
+.vitamin-card.iron::before { background: #ef4444; }
+.vitamin-card.zinc::before { background: #3b82f6; }
+
+.vitamin-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.vitamin-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.vit-a .vitamin-icon { background: #fff7ed; }
+.vit-b .vitamin-icon { background: #f5f3ff; }
+.vit-c .vitamin-icon { background: #fffbeb; }
+.vit-d .vitamin-icon { background: #fefce8; }
+.vit-e .vitamin-icon { background: #ecfdf5; }
+.iron .vitamin-icon { background: #fef2f2; }
+.zinc .vitamin-icon { background: #eff6ff; }
+
+.vitamin-title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.vitamin-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.vitamin-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #9ca3af;
+    margin: 12px 0 6px;
+}
+
+.vitamin-reason {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.food-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 6px;
+}
+
+.food-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.lifestyle-tip {
+    font-size: 13px;
+    color: #374151;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.lifestyle-tip::before {
+    content: '→';
+    color: #4a90e2;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.vitamin-disclaimer {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1px solid #f59e0b;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.6;
+}
+
+.vitamin-disclaimer strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.no-deficiency {
+    text-align: center;
+    padding: 30px 20px;
+    color: #6b7280;
+}
+
+.no-deficiency .check-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.deficiency-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    background: #f0f9ff;
+    border-radius: 14px;
+    border: 1px solid #bae6fd;
+    margin-bottom: 20px;
+}
+
+.deficiency-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: white;
+    border: 2px solid #bae6fd;
+    color: #0369a1;
+}
+
+/* ---------- Footer ---------- */
+footer {
+    text-align: center;
+    color: white;
+    font-size: 13px;
+    margin-top: 50px;
+    opacity: 0.85;
+}
+
+/* ---------- Print Styles ---------- */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    button {
+        display: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🩺 DermaScan AI</h1>
+        <p>Intelligent Skin Safety & Risk Advisor</p>
+    </div>
+    <div style="max-width:1100px;margin:8px auto 0;padding:0 20px;">
+        <button style="background:#357abd;color:#fff;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;" onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+    </div>
+
+    <!-- Input -->
+    <div class="glass">
+        <div class="form-grid">
+            
+            <!-- Basic Info -->
+            <div class="form-section">
+                <h4>📋 Skin Profile</h4>
+                <div>
+                    <label>Skin Type</label>
+                    <select id="skin">
+                        <option value="">Select</option>
+                        <option>Normal</option>
+                        <option>Oily</option>
+                        <option>Dry</option>
+                        <option>Combination</option>
+                        <option>Sensitive</option>
+                    </select>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label>Age Group</label>
+                    <select id="age">
+                        <option value="">Select</option>
+                        <option>13-18</option>
+                        <option>19-25</option>
+                        <option>26-35</option>
+                        <option>36-50</option>
+                        <option>50+</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Concerns -->
+            <div class="form-section">
+                <h4>🔍 Current Concerns</h4>
+                <div>
+                    <label>Primary Concern</label>
+                    <select id="concern">
+                        <option value="">Select</option>
+                        <option>Acne</option>
+                        <option>Pigmentation</option>
+                        <option>Allergy</option>
+                        <option>Infection</option>
+                        <option>Aging</option>
+                    </select>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label>Severity Level</label>
+                    <input type="range" id="severity" min="1" max="10" value="5" onchange="updateSeverity()">
+                    <span class="slider-value" id="severityVal">5/10</span>
+                </div>
+            </div>
+
+            <!-- Lifestyle -->
+            <div class="form-section">
+                <h4>🌱 Lifestyle Factors</h4>
+                <div>
+                    <label>Sleep Hours/Night</label>
+                    <select id="sleep">
+                        <option value="">Select</option>
+                        <option>Less than 5</option>
+                        <option>5-6 hours</option>
+                        <option>7-8 hours</option>
+                        <option>9+ hours</option>
+                    </select>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label>Hydration Level</label>
+                    <select id="hydration">
+                        <option value="">Select</option>
+                        <option>Low (1-2 glasses)</option>
+                        <option>Moderate (3-6 glasses)</option>
+                        <option>Good (7-8 glasses)</option>
+                        <option>Excellent (9+ glasses)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Environment -->
+            <div class="form-section">
+                <h4>🌍 Environmental Factors</h4>
+                <div>
+                    <label>Sun Exposure</label>
+                    <select id="sun">
+                        <option value="">Select</option>
+                        <option>Minimal (indoor)</option>
+                        <option>Moderate (2-4 hrs)</option>
+                        <option>High (4-8 hrs)</option>
+                        <option>Very High (8+ hrs)</option>
+                    </select>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label>Climate Type</label>
+                    <select id="climate">
+                        <option value="">Select</option>
+                        <option>Hot & Humid</option>
+                        <option>Moderate & Humid</option>
+                        <option>Dry & Cold</option>
+                        <option>Polluted Urban</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Health -->
+            <div class="form-section">
+                <h4>💊 Medical History</h4>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="allergies"> Known Allergies</label>
+                    <label><input type="checkbox" id="medications"> On Medications</label>
+                    <label><input type="checkbox" id="hormones"> Hormonal Changes</label>
+                    <label><input type="checkbox" id="stress"> High Stress Levels</label>
+                </div>
+            </div>
+
+            <!-- Recent Products -->
+            <div class="form-section">
+                <h4>🧴 Recent Products</h4>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="newProducts"> New Products (Last Week)</label>
+                    <label><input type="checkbox" id="exfoliating"> Using Exfoliants</label>
+                    <label><input type="checkbox" id="actives"> Using Active Ingredients</label>
+                    <label><input type="checkbox" id="spf"> Daily SPF Usage</label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="button-group">
+            <button onclick="analyze()">🔍 Analyze My Skin</button>
+            <button class="secondary" onclick="clearForm()">↻ Reset</button>
+            <button class="secondary" onclick="printReport()">🖨️ Print</button>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div id="output"></div>
+
+    <footer>
+        ⚠️ Educational tool only. Not a medical diagnosis.
+    </footer>
+</div>
+
+<script>
+function updateSeverity() {
+    const val = document.getElementById("severity").value;
+    document.getElementById("severityVal").textContent = val + "/10";
+}
+
+function clearForm() {
+    document.querySelectorAll("select, input[type='checkbox']").forEach(el => {
+        if (el.type === 'checkbox') el.checked = false;
+        else el.value = "";
+    });
+    document.getElementById("severity").value = "5";
+    document.getElementById("output").innerHTML = "";
+    updateSeverity();
+}
+
+function printReport() {
+    window.print();
+}
+
+function analyze() {
+    const skin = document.getElementById("skin").value;
+    const concern = document.getElementById("concern").value;
+    const age = document.getElementById("age").value;
+    const severity = parseInt(document.getElementById("severity").value);
+    const sleep = document.getElementById("sleep").value;
+    const hydration = document.getElementById("hydration").value;
+    const sun = document.getElementById("sun").value;
+    const climate = document.getElementById("climate").value;
+    const allergies = document.getElementById("allergies").checked;
+    const medications = document.getElementById("medications").checked;
+    const hormones = document.getElementById("hormones").checked;
+    const stress = document.getElementById("stress").checked;
+    const newProducts = document.getElementById("newProducts").checked;
+    const exfoliating = document.getElementById("exfoliating").checked;
+    const actives = document.getElementById("actives").checked;
+    const spf = document.getElementById("spf").checked;
+
+    if (!skin || !concern || !age) {
+        alert("Please complete the Skin Profile & Concerns sections.");
+        return;
+    }
+
+    // Calculate base score
+    let baseScore = 75;
+    let riskLevel = "low";
+    let issues = [];
+    let routine = [];
+    let warnings = [];
+
+    // Skin type modifiers
+    const skinScores = {
+        "Normal": 80,
+        "Oily": 60,
+        "Dry": 65,
+        "Combination": 70,
+        "Sensitive": 50
+    };
+
+    const skinIssues = {
+        "Normal": ["Occasional sensitivity", "Minor breakouts"],
+        "Oily": ["Acne prone", "Excess sebum", "Clogged pores", "Blackheads"],
+        "Dry": ["Flaking", "Tight feeling", "Premature aging signs", "Irritation"],
+        "Combination": ["T-zone oiliness", "Cheek dryness", "Uneven texture"],
+        "Sensitive": ["Redness", "Burning sensation", "Reactivity", "Inflammation"]
+    };
+
+    const skinRoutines = {
+        "Normal": ["Gentle cleanser", "Lightweight moisturizer", "SPF 30+"],
+        "Oily": ["Oil-control cleanser", "Gel moisturizer", "Salicylic acid 2x/week"],
+        "Dry": ["Hydrating cleanser", "Rich moisturizer", "Hydrating mask weekly"],
+        "Combination": ["Gentle gel cleanser", "Lightweight hydrator", "Targeted treatments"],
+        "Sensitive": ["Fragrance-free cleanser", "Minimal products", "Hypoallergenic SPF"]
+    };
+
+    baseScore = skinScores[skin];
+    issues = [...skinIssues[skin]];
+    routine = [...skinRoutines[skin]];
+
+    // Concern modifiers
+    const concernMods = {
+        "Acne": { score: -20, addIssues: ["Active breakouts", "Post-acne marks"], addRoutine: ["Spot treatment", "Niacinamide serum"] },
+        "Pigmentation": { score: -10, addIssues: ["Dark spots", "Uneven tone"], addRoutine: ["Vitamin C serum", "SPF 50+"] },
+        "Allergy": { score: -25, addIssues: ["Allergic reactions", "Itching"], addRoutine: ["Patch testing", "Allergen avoidance"] },
+        "Infection": { score: -30, addIssues: ["Bacterial growth", "Inflammation"], addRoutine: ["Antibacterial cleanser", "Doctor visit"] },
+        "Aging": { score: -5, addIssues: ["Fine lines", "Loss of elasticity"], addRoutine: ["Retinol/Retinoids", "Peptide serum"] }
+    };
+
+    const mod = concernMods[concern];
+    baseScore += mod.score;
+    issues = [...issues, ...mod.addIssues];
+    routine = [...routine, ...mod.addRoutine];
+
+    // Severity impact
+    baseScore -= (severity - 5) * 2;
+
+    // Lifestyle adjustments
+    if (sleep === "Less than 5" || sleep === "5-6 hours") baseScore -= 8;
+    if (hydration === "Low (1-2 glasses)") baseScore -= 10;
+    if (sun === "High (4-8 hrs)" || sun === "Very High (8+ hrs)") baseScore -= 5;
+    if (!spf) baseScore -= 15;
+
+    // Health factors
+    if (allergies) { warnings.push({type: "danger", msg: "⚠️ Known allergies - patch test all new products"}); riskLevel = "high"; }
+    if (medications) warnings.push({type: "warning", msg: "⚠️ Current medications may affect skin - consult dermatologist"});
+    if (hormones) warnings.push({type: "warning", msg: "⚠️ Hormonal changes may cause flare-ups"});
+    if (stress) warnings.push({type: "warning", msg: "⚠️ High stress can worsen skin conditions"});
+    if (newProducts) warnings.push({type: "info", msg: "ℹ️ New products may cause temporary reactions - monitor closely"});
+    if (exfoliating && severity >= 7) warnings.push({type: "danger", msg: "⚠️ Avoid exfoliating while condition is severe"});
+
+    // Climate impact
+    if (climate === "Hot & Humid") baseScore -= 5;
+    if (climate === "Dry & Cold") baseScore -= 7;
+    if (climate === "Polluted Urban") { baseScore -= 10; warnings.push({type: "warning", msg: "🌫️ Double cleanse due to pollution"}); }
+
+    // Determine final risk level
+    if (baseScore <= 40) riskLevel = "high";
+    else if (baseScore <= 65) riskLevel = "medium";
+    else riskLevel = "low";
+
+    baseScore = Math.max(10, Math.min(100, baseScore));
+
+    // Generate detailed recommendations
+    let recommendations = generateRecommendations(skin, concern, severity, age);
+
+    // Generate vitamin deficiency analysis
+    let vitaminData = generateVitaminAnalysis({ skin, concern, severity, age, sleep, hydration, sun, climate, allergies, medications, hormones, stress, spf, exfoliating, actives });
+
+    // HTML Output
+    const deg = baseScore * 3.6;
+
+    const warningsHTML = warnings.map(w => 
+        `<div class="alert alert-${w.type}">${w.msg}</div>`
+    ).join("");
+
+    document.getElementById("output").innerHTML = `
+    <div class="glass result-grid">
+        <div class="score-card">
+            <div class="score-ring" style="background:conic-gradient(#4a90e2 ${deg}deg, #e5e7eb ${deg}deg)">
+                <div class="score-inner">
+                    <span>${baseScore}</span>
+                    <small>Safety Score</small>
+                </div>
+            </div>
+            <div class="risk ${riskLevel}">
+                ${riskLevel.toUpperCase()} RISK
+            </div>
+            <p style="font-size: 12px; color: #6b7280; margin-top: 16px;">
+                Age: ${age} | Severity: ${severity}/10
+            </p>
+        </div>
+
+        <div>
+            ${warningsHTML}
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'overview')">Overview</button>
+                <button class="tab-btn" onclick="switchTab(event, 'routine')">Routine</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tips')">Expert Tips</button>
+                <button class="tab-btn" onclick="switchTab(event, 'vitamins')">💊 Nutrients</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <div class="info-card">
+                    <h3>🧩 Identified Issues</h3>
+                    <ul>${issues.map(i => `<li>${i}</li>`).join("")}</ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔬 Skin Analysis</h3>
+                    <p><strong>Type:</strong> ${skin}</p>
+                    <p><strong>Main Concern:</strong> ${concern}</p>
+                    <p><strong>Condition:</strong> ${severity >= 7 ? "Severe" : severity >= 4 ? "Moderate" : "Mild"}</p>
+                    <p><strong>Climate Impact:</strong> ${climate || "Not specified"}</p>
+                </div>
+            </div>
+
+            <div id="routine" class="tab-content">
+                <div class="info-card">
+                    <h3>🧴 Daily Skincare Routine</h3>
+                    <h4 style="margin-top: 14px; color: #4a90e2;">Morning:</h4>
+                    <ul>
+                        <li>Gentle cleanser</li>
+                        <li>${routine[0]}</li>
+                        ${spf ? '<li>SPF 30-50+</li>' : '<li>SPF 30+ (ESSENTIAL)</li>'}
+                    </ul>
+                    <h4 style="margin-top: 14px; color: #4a90e2;">Evening:</h4>
+                    <ul>
+                        <li>Cleanser</li>
+                        <li>${routine[1] || "Moisturizer"}</li>
+                        <li>${routine[2] || "Targeted treatment as needed"}</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚡ Weekly Treatments</h3>
+                    <ul>
+                        ${exfoliating ? '<li style="color: #dc2626;">Reduce exfoliation - your skin is sensitive</li>' : '<li>Gentle exfoliation (1-2x/week)</li>'}
+                        ${severity <= 3 ? '<li>Hydrating or clay mask based on skin type</li>' : '<li>Hydrating mask only (avoid actives)</li>'}
+                        <li>Patch test any new products</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="tips" class="tab-content">
+                <div class="info-card">
+                    <h3>👨‍⚕️ Expert Recommendations</h3>
+                    ${recommendations}
+                </div>
+
+                <div class="info-card">
+                    <h3>🚨 Important Warnings</h3>
+                    <ul>
+                        <li>Stop use if irritation develops</li>
+                        <li>Introduce new products one at a time (wait 1-2 weeks)</li>
+                        <li>Patch test behind ear or inner arm first</li>
+                        <li>Consult dermatologist if no improvement in 4-6 weeks</li>
+                        ${allergies ? '<li>Keep antihistamine handy for allergic reactions</li>' : ''}
+                        ${medications ? '<li>Inform dermatologist of all medications</li>' : ''}
+                    </ul>
+                </div>
+            </div>
+
+            <div id="vitamins" class="tab-content">
+                ${vitaminData}
+            </div>
+        </div>
+    </div>`;
+}
+
+// ============================================================
+// VITAMIN DEFICIENCY ANALYSIS ENGINE
+// ============================================================
+function generateVitaminAnalysis(params) {
+    const { skin, concern, severity, age, sleep, hydration, sun, climate, allergies, medications, hormones, stress, spf, exfoliating, actives } = params;
+
+    let deficiencies = [];
+
+    // ---- Vitamin D ----
+    if (sun === "Minimal (indoor)" || !sun) {
+        deficiencies.push({
+            key: "vit-d",
+            icon: "☀️",
+            name: "Vitamin D",
+            subtitle: "The Sunshine Vitamin",
+            reason: "Your minimal sun exposure significantly limits your skin's natural ability to synthesize Vitamin D. Low Vitamin D is associated with increased skin inflammation, slower wound healing, and conditions such as eczema and psoriasis flare-ups.",
+            foods: ["Salmon", "Egg yolks", "Fortified milk", "Mushrooms", "Tuna", "Fortified cereals"],
+            lifestyle: [
+                "Aim for 10–20 minutes of gentle morning sunlight exposure daily",
+                "Consider a Vitamin D3 supplement after consulting your doctor",
+                "Expose forearms or legs during safe sun hours (before 10 AM)"
+            ]
+        });
+    }
+
+    // ---- Vitamin C ----
+    if (sun === "High (4-8 hrs)" || sun === "Very High (8+ hrs)" || concern === "Pigmentation" || climate === "Polluted Urban") {
+        let reason = "";
+        if (sun === "Very High (8+ hrs)" || sun === "High (4-8 hrs)") {
+            reason = "Prolonged sun exposure rapidly depletes Vitamin C in skin cells through oxidative stress. This antioxidant is essential for collagen production, UV damage repair, and brightening uneven skin tone.";
+        } else if (concern === "Pigmentation") {
+            reason = "Pigmentation concerns are strongly linked to Vitamin C status. This antioxidant inhibits melanin overproduction and supports collagen synthesis, both critical for fading dark spots and evening skin tone.";
+        } else {
+            reason = "Urban pollution generates free radicals that rapidly deplete skin's Vitamin C reserves, weakening the skin barrier and accelerating premature aging and dullness.";
+        }
+        deficiencies.push({
+            key: "vit-c",
+            icon: "🍊",
+            name: "Vitamin C",
+            subtitle: "Antioxidant & Collagen Booster",
+            reason,
+            foods: ["Oranges", "Guava", "Bell peppers", "Kiwi", "Strawberries", "Broccoli", "Amla (Indian gooseberry)"],
+            lifestyle: [
+                "Apply a topical Vitamin C serum in the morning before SPF",
+                "Consume at least 2–3 servings of citrus or bell peppers daily",
+                "Avoid smoking, which depletes Vitamin C significantly"
+            ]
+        });
+    }
+
+    // ---- Vitamin E ----
+    if (skin === "Dry" || sun === "High (4-8 hrs)" || sun === "Very High (8+ hrs)" || concern === "Aging") {
+        deficiencies.push({
+            key: "vit-e",
+            icon: "🌿",
+            name: "Vitamin E",
+            subtitle: "Skin Barrier Protector",
+            reason: "Your skin type or sun exposure level suggests elevated oxidative stress, which rapidly depletes Vitamin E. This fat-soluble vitamin is essential for maintaining the skin's lipid barrier, preventing moisture loss, and protecting against UV-induced cell damage.",
+            foods: ["Almonds", "Sunflower seeds", "Wheat germ", "Avocado", "Spinach", "Olive oil", "Peanuts"],
+            lifestyle: [
+                "Use moisturizers containing Vitamin E, especially for dry skin",
+                "Incorporate a small handful of nuts or seeds daily",
+                "Pair Vitamin E-rich foods with Vitamin C for synergistic antioxidant effect"
+            ]
+        });
+    }
+
+    // ---- Vitamin A ----
+    if (concern === "Acne" || concern === "Aging" || skin === "Dry" || severity >= 7) {
+        let reason = "";
+        if (concern === "Acne") {
+            reason = "Vitamin A (retinol) regulates sebum production and promotes healthy skin cell turnover. Deficiency is linked to clogged pores, increased acne, and rough, scaly skin texture. Its derivative, tretinoin, is a clinically proven acne treatment.";
+        } else if (concern === "Aging") {
+            reason = "Vitamin A is crucial for stimulating collagen synthesis and accelerating cell renewal. Low levels contribute to thinning skin, fine lines, and impaired healing — all hallmarks of premature aging.";
+        } else {
+            reason = "Dry, flaky skin with a rough texture can indicate insufficient Vitamin A, which is needed to maintain and repair the skin's epithelial tissue and support the protective mucous membranes.";
+        }
+        deficiencies.push({
+            key: "vit-a",
+            icon: "🥕",
+            name: "Vitamin A",
+            subtitle: "Cell Renewal & Sebum Control",
+            reason,
+            foods: ["Carrots", "Sweet potato", "Spinach", "Kale", "Liver", "Dairy products", "Eggs", "Mango"],
+            lifestyle: [
+                "Consume orange and deep green vegetables daily for beta-carotene",
+                "If using topical retinoids, avoid additional Vitamin A supplements without medical advice",
+                "Pair with healthy fats (avocado, olive oil) for better absorption"
+            ]
+        });
+    }
+
+    // ---- Vitamin B Complex ----
+    if (stress || sleep === "Less than 5" || sleep === "5-6 hours" || concern === "Acne" || skin === "Oily") {
+        let reason = "";
+        if (stress && (sleep === "Less than 5" || sleep === "5-6 hours")) {
+            reason = "High stress combined with poor sleep significantly depletes B vitamins — especially B2 (riboflavin), B3 (niacin), B5 (pantothenic acid), and B7 (biotin). These are essential for energy metabolism, skin barrier integrity, sebum regulation, and controlling skin inflammation.";
+        } else if (stress) {
+            reason = "Chronic stress rapidly depletes B vitamins, particularly B5 (pantothenic acid) which regulates adrenal hormones and sebum production, and B3 (niacinamide) which reduces skin inflammation and redness.";
+        } else if (sleep === "Less than 5" || sleep === "5-6 hours") {
+            reason = "Poor sleep disrupts the body's ability to absorb and utilize B vitamins effectively. B3 (niacinamide) and B5 are particularly affected, contributing to increased skin sensitivity, dullness, and impaired barrier function.";
+        } else {
+            reason = "Oily or acne-prone skin may indicate a deficiency in B5 (pantothenic acid), which directly influences sebum regulation. B3 (niacinamide) deficiency is also linked to increased skin inflammation and acne.";
+        }
+        deficiencies.push({
+            key: "vit-b",
+            icon: "🌾",
+            name: "Vitamin B Complex",
+            subtitle: "B2, B3, B5, B7 — Skin Metabolism",
+            reason,
+            foods: ["Brown rice", "Whole grains", "Legumes", "Eggs", "Chicken", "Leafy greens", "Bananas", "Yogurt", "Sunflower seeds"],
+            lifestyle: [
+                "Prioritize 7–8 hours of quality sleep each night",
+                "Practice stress-reduction techniques: meditation, yoga, or 10 min breathing exercises",
+                "Avoid refined sugars and processed foods that deplete B vitamins",
+                "Consider topical niacinamide (B3) serums for visible skin benefits"
+            ]
+        });
+    }
+
+    // ---- Iron ----
+    if (skin === "Sensitive" || concern === "Allergy" || concern === "Infection" || (age === "13-18" && hormones)) {
+        deficiencies.push({
+            key: "iron",
+            icon: "🩸",
+            name: "Iron",
+            subtitle: "Oxygen Transport & Healing",
+            reason: "Sensitive or reactive skin conditions, along with hormonal fluctuations especially in younger individuals, are often accompanied by low iron stores. Iron deficiency impairs oxygen delivery to skin cells, slows healing, causes pallor, and increases susceptibility to infections and inflammation.",
+            foods: ["Spinach", "Lentils", "Red meat (lean)", "Tofu", "Pumpkin seeds", "Chickpeas", "Fortified cereals", "Dark chocolate"],
+            lifestyle: [
+                "Pair iron-rich plant foods with Vitamin C sources to boost absorption",
+                "Avoid drinking tea or coffee immediately after iron-rich meals",
+                "Get a blood test (CBC) to confirm iron levels before supplementing",
+                "Cook in cast iron pans — small amounts of iron leach into food"
+            ]
+        });
+    }
+
+    // ---- Zinc ----
+    if (concern === "Acne" || concern === "Infection" || hydration === "Low (1-2 glasses)" || severity >= 6) {
+        deficiencies.push({
+            key: "zinc",
+            icon: "⚗️",
+            name: "Zinc",
+            subtitle: "Wound Healing & Anti-Inflammatory",
+            reason: "Zinc is one of the most critical minerals for skin health. It regulates oil gland activity, reduces inflammation, supports wound healing, and has proven antibacterial properties. Low zinc is directly linked to acne severity, slow-healing lesions, and impaired immune response in the skin.",
+            foods: ["Pumpkin seeds", "Chickpeas", "Cashews", "Lentils", "Oysters", "Beef", "Hemp seeds", "Whole grains"],
+            lifestyle: [
+                "Increase water intake to support zinc absorption and skin hydration",
+                "Zinc supplements (15–30 mg/day) have shown effectiveness for acne — consult your doctor",
+                "Avoid phytic acid-heavy meals (unsoaked legumes) in excess, which inhibit zinc absorption",
+                "Look for zinc oxide in sunscreens — dual benefit for UV and skin healing"
+            ]
+        });
+    }
+
+    // Build HTML
+    if (deficiencies.length === 0) {
+        return `
+        <div class="no-deficiency">
+            <span class="check-icon">✅</span>
+            <strong>No major vitamin deficiency signals detected</strong>
+            <p style="font-size:14px;color:#6b7280;margin-top:8px;">Based on your profile, your lifestyle factors appear balanced. Continue maintaining good habits!</p>
+        </div>
+        <div class="vitamin-disclaimer">
+            <strong>⚠️ Educational Disclaimer</strong>
+            This vitamin analysis is for informational purposes only and does not constitute medical advice or diagnosis. Nutrient deficiencies can only be confirmed through clinical blood tests. Always consult a qualified healthcare professional or registered dietitian before making significant dietary changes or starting supplements.
+        </div>`;
+    }
+
+    const summaryPills = deficiencies.map(d => 
+        `<span class="deficiency-pill">${d.icon} ${d.name}</span>`
+    ).join("");
+
+    const cardsHTML = deficiencies.map(d => `
+        <div class="vitamin-card ${d.key}">
+            <div class="vitamin-header">
+                <div class="vitamin-icon">${d.icon}</div>
+                <div>
+                    <div class="vitamin-title">${d.name}</div>
+                    <div class="vitamin-subtitle">${d.subtitle}</div>
+                </div>
+            </div>
+
+            <div class="vitamin-section-label">Why This May Be Low For You</div>
+            <div class="vitamin-reason">${d.reason}</div>
+
+            <div class="vitamin-section-label">Recommended Foods</div>
+            <div class="food-tags">
+                ${d.foods.map(f => `<span class="food-tag">${f}</span>`).join("")}
+            </div>
+
+            <div class="vitamin-section-label">Lifestyle Suggestions</div>
+            ${d.lifestyle.map(l => `<div class="lifestyle-tip">${l}</div>`).join("")}
+        </div>
+    `).join("");
+
+    return `
+        <div style="margin-bottom: 16px;">
+            <h3 style="margin:0 0 8px;font-size:15px;">🔬 Possible Nutrient Deficiencies Detected</h3>
+            <p style="font-size:13px;color:#6b7280;margin:0 0 14px;">Based on your skin profile, lifestyle, and environmental factors, the following nutrients may need attention:</p>
+            <div class="deficiency-summary-bar">${summaryPills}</div>
+        </div>
+        ${cardsHTML}
+        <div class="vitamin-disclaimer">
+            <strong>⚠️ Important Educational Disclaimer</strong>
+            This vitamin and nutrient analysis is generated for educational purposes only and is <strong>not</strong> a medical diagnosis. Nutritional deficiencies can only be accurately identified through clinical laboratory tests (blood work). The suggestions above are general dietary guidelines and should not replace advice from a qualified dermatologist, physician, or registered dietitian. Do not self-prescribe supplements based solely on this report. Always seek professional medical guidance before making significant changes to your diet or supplement routine.
+        </div>`;
+}
+
+function generateRecommendations(skin, concern, severity, age) {
+    let recs = [];
+
+    // Age-based recommendations
+    if (age === "13-18") {
+        recs.push("Focus on oil control and acne prevention");
+        recs.push("Avoid overly harsh treatments");
+    } else if (age === "36-50" || age === "50+") {
+        recs.push("Incorporate anti-aging ingredients (retinol, peptides)");
+        recs.push("Increase moisturization");
+    }
+
+    // Concern-specific
+    if (concern === "Acne") {
+        recs.push("Use salicylic acid or benzoyl peroxide");
+        recs.push("Keep skin clean but avoid over-washing");
+        recs.push("Never squeeze or pick at breakouts");
+    } else if (concern === "Pigmentation") {
+        recs.push("Use Vitamin C serum daily");
+        recs.push("SPF 50+ is non-negotiable");
+        recs.push("Consider professional treatments (laser, chemical peel)");
+    } else if (concern === "Allergy") {
+        recs.push("Use hypoallergenic, fragrance-free products only");
+        recs.push("Keep skin barrier strong with ceramides");
+        recs.push("See allergist if reactions are severe");
+    } else if (concern === "Infection") {
+        recs.push("Medical treatment may be necessary");
+        recs.push("Maintain strict hygiene");
+        recs.push("See dermatologist immediately");
+    } else if (concern === "Aging") {
+        recs.push("Use retinoid products 2-3x/week");
+        recs.push("Collagen-boosting treatments help");
+        recs.push("Consistent sun protection is crucial");
+    }
+
+    // Severity-based
+    if (severity >= 8) {
+        recs.push("Simplify routine - use only essentials");
+        recs.push("Avoid ALL new products temporarily");
+        recs.push("Professional dermatology consultation strongly recommended");
+    }
+
+    return recs.map(r => `<li>${r}</li>`).join("");
+}
+
+function switchTab(e, tabName) {
+    e.preventDefault();
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    document.getElementById(tabName).classList.add("active");
+    e.target.classList.add("active");
+}
+</script>
+
+</body>
+</html>

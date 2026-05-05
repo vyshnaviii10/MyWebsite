@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan | Hospitals Nearby</title>
+<style>
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(120deg,#e9f7ff,#ffffff);
+}
+.header{
+    background:#0a5c75;
+    color:white;
+    padding:18px;
+    text-align:center;
+    font-size:22px;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+.container{
+    padding:30px;
+    max-width:900px;
+    margin:auto;
+}
+.location-badge{
+    background:#eaf6fb;
+    color:#0a5c75;
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:14px;
+    display:inline-block;
+    margin-bottom:20px;
+}
+.hospital-card{
+    background:white;
+    border-radius:20px;
+    padding:22px;
+    margin-bottom:20px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.12);
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hospital-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.18);
+}
+.hospital-top{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:12px;
+}
+.icon{
+    font-size:34px;
+}
+.hospital-card h3{
+    margin:0;
+    color:#0a5c75;
+}
+.hospital-card p{
+    margin:6px 0 14px;
+    color:#444;
+    font-size:14.5px;
+}
+.actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.actions a{
+    text-decoration:none;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:14px;
+    color:white;
+}
+.map-btn{ background:#0a5c75; }
+.call-btn{ background:#28a745; }
+.book-btn{ background:#f0ad4e; }
+.back-btn{
+    margin-top:30px;
+    text-align:center;
+}
+.back-btn button{
+    background:#0a5c75;
+    color:white;
+    border:none;
+    padding:12px 22px;
+    border-radius:14px;
+    font-size:15px;
+    cursor:pointer;
+}
+.footer{
+    background:#0a5c75;
+    color:white;
+    text-align:center;
+    padding:12px;
+    font-size:13px;
+    margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🏥 Hospitals & Dermatologists Nearby</div>
+
+<div class="container">
+    <div id="location" class="location-badge">📡 Detecting your location...</div>
+
+    <div id="hospitalList"></div>
+
+    <div class="back-btn">
+        <button onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+    </div>
+</div>
+
+<div class="footer">
+⚠ Hospital information is for guidance only. Please verify before booking.
+</div>
+
+<script>
+const locationBadge = document.getElementById("location");
+const hospitalList = document.getElementById("hospitalList");
+
+// Check if geolocation is supported
+if (!navigator.geolocation) {
+    locationBadge.innerText = "❌ Location not supported by your browser.";
+} else {
+    navigator.geolocation.getCurrentPosition(fetchNearbyHospitals, locationError);
+}
+
+function locationError() {
+    locationBadge.innerText = "❌ Location access denied. Enable GPS.";
+}
+
+// Fetch nearby hospitals using OpenStreetMap + Overpass API
+async function fetchNearbyHospitals(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    locationBadge.innerText = "📍 Showing dermatologists near your location";
+
+    // Small bounding box around the user (~2km radius)
+    const radius = 0.02;
+    const bbox = `${lat - radius},${lon - radius},${lat + radius},${lon + radius}`;
+
+    // Overpass QL query: fetch hospitals
+    const query = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="hospital"](${bbox});
+          way["amenity"="hospital"](${bbox});
+          relation["amenity"="hospital"](${bbox});
+        );
+        out center;
+    `;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const hospitals = data.elements;
+
+        if (!hospitals || hospitals.length === 0) {
+            hospitalList.innerHTML = "<p>No nearby hospitals found.</p>";
+            return;
+        }
+
+        hospitals.forEach(hospital => {
+            const name = hospital.tags.name || "Unnamed Hospital";
+            const address = hospital.tags["addr:street"] || hospital.tags["addr:housenumber"] || "Address not available";
+
+            const mapLink = `https://www.openstreetmap.org/?mlat=${hospital.lat || hospital.center?.lat}&mlon=${hospital.lon || hospital.center?.lon}#map=17`;
+
+            const card = document.createElement("div");
+            card.className = "hospital-card";
+            card.innerHTML = `
+                <div class="hospital-top">
+                    <div class="icon">🏥</div>
+                    <div>
+                        <h3>${name}</h3>
+                        <p>${address}</p>
+                    </div>
+                </div>
+                <div class="actions">
+                    <a href="${mapLink}" target="_blank" class="map-btn">📍 View Map</a>
+                    <a href="tel:+911234567890" class="call-btn">📞 Call</a>
+                    <a href="${mapLink}" target="_blank" class="book-btn">📅 Book</a>
+                </div>
+            `;
+            hospitalList.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error(error);
+        hospitalList.innerHTML = "<p>❌ Failed to fetch nearby hospitals. Please try again later.</p>";
+    }
+}
+</script>
+
+</body>
+</html>

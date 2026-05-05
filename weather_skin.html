@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan | Weather & Skin</title>
+
+<style>
+:root{
+    --primary:#0a5c75;
+    --secondary:#0f7fa0;
+    --soft:#eaf7fd;
+}
+
+body{
+    margin:0;
+    font-family:"Segoe UI",system-ui;
+    background:linear-gradient(120deg,#eaf7fd,#ffffff);
+    color:#333;
+}
+
+/* HEADER */
+.header{
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    color:white;
+    padding:22px;
+    text-align:center;
+    font-size:22px;
+    letter-spacing:0.5px;
+}
+
+/* CONTAINER */
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:35px 25px 80px;
+}
+
+/* CARDS */
+.card{
+    position:relative;
+    background:rgba(255,255,255,0.96);
+    border-radius:26px;
+    padding:26px;
+    margin-bottom:28px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.12);
+    overflow:hidden;
+}
+
+/* Decorative overlay (FIXED) */
+.card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg,rgba(10,92,117,0.08),transparent);
+    pointer-events:none; /* ✅ slider fix */
+}
+
+.card h3{
+    margin:0 0 10px;
+    color:var(--primary);
+    font-size:19px;
+}
+
+.card p{
+    margin:6px 0;
+    font-size:15px;
+    line-height:1.5;
+}
+
+/* VALUE */
+.value{
+    font-size:22px;
+    font-weight:600;
+    margin-top:6px;
+}
+
+/* TIPS */
+.tips{
+    margin-top:14px;
+    padding:16px 18px;
+    background:#f1f9fc;
+    border-left:5px solid var(--primary);
+    border-radius:16px;
+    font-size:14.5px;
+}
+
+.tips strong{
+    display:block;
+    margin-bottom:6px;
+    color:#04485d;
+}
+
+.tips ul{
+    margin:8px 0 0 18px;
+}
+
+/* SLIDER */
+.slider{
+    width:100%;
+    margin:14px 0;
+    -webkit-appearance:none;
+    appearance:none;
+    height:6px;
+    border-radius:10px;
+    background:#d9eef5;
+    outline:none;
+}
+
+.slider::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--primary);
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,0.25);
+    transition:0.2s;
+}
+
+.slider::-webkit-slider-thumb:hover{
+    transform:scale(1.15);
+}
+
+.slider::-moz-range-thumb{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--primary);
+    cursor:pointer;
+}
+
+/* STATUS */
+.status-card{
+    text-align:center;
+    font-size:15px;
+}
+
+/* BACK */
+.back-btn{
+    text-align:center;
+    margin-top:35px;
+}
+
+.back-btn button{
+    background:var(--primary);
+    color:white;
+    border:none;
+    padding:14px 26px;
+    border-radius:18px;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.back-btn button:hover{
+    background:#084c62;
+    transform:translateY(-2px);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🌍 Environmental Impact on Your Skin</div>
+
+<div class="container">
+
+    <div id="status" class="card status-card">
+        📡 Detecting your location…
+    </div>
+
+    <div id="weatherCard" class="card"></div>
+    <div id="uvCard" class="card"></div>
+    <div id="pollutionCard" class="card"></div>
+
+    <!-- SCREEN TIME -->
+    <div class="card">
+        <h3>📱 Screen Time & Blue Light Exposure</h3>
+        <input type="range" min="1" max="12" value="4" class="slider" id="screenTime">
+        <div id="screenResult"></div>
+    </div>
+
+    <div class="back-btn">
+        <button onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+    </div>
+
+</div>
+
+<script>
+const statusBox = document.getElementById("status");
+const weatherCard = document.getElementById("weatherCard");
+const uvCard = document.getElementById("uvCard");
+const pollutionCard = document.getElementById("pollutionCard");
+const screenSlider = document.getElementById("screenTime");
+const screenResult = document.getElementById("screenResult");
+
+/* SCREEN TIME */
+function updateScreenTime(){
+    const hrs = screenSlider.value;
+    let reaction, tips;
+
+    if(hrs <= 3){
+        reaction = "Low blue light exposure";
+        tips = `
+        <ul>
+            <li>Enable night mode on devices</li>
+            <li>Maintain proper sleep cycle</li>
+            <li>Basic moisturization is enough</li>
+        </ul>`;
+    }
+    else if(hrs <= 6){
+        reaction = "Moderate exposure";
+        tips = `
+        <ul>
+            <li>Use blue light filter glasses</li>
+            <li>Apply antioxidant serums</li>
+            <li>Follow 20-20-20 eye rule</li>
+        </ul>`;
+    }
+    else{
+        reaction = "High exposure risk";
+        tips = `
+        <ul>
+            <li>Avoid screens before sleep</li>
+            <li>Apply indoor SPF</li>
+            <li>Increase antioxidant intake</li>
+        </ul>`;
+    }
+
+    screenResult.innerHTML = `
+        <p class="value">${hrs} hrs/day</p>
+        <p>${reaction}</p>
+        <div class="tips">
+            <strong>🧑‍⚕️ Dermatologist Tips</strong>
+            ${tips}
+        </div>
+    `;
+}
+screenSlider.addEventListener("input", updateScreenTime);
+updateScreenTime();
+
+/* LOCATION */
+if(!navigator.geolocation){
+    statusBox.innerText = "❌ Location not supported.";
+}else{
+    navigator.geolocation.getCurrentPosition(fetchData, ()=> {
+        statusBox.innerText = "❌ Location permission denied.";
+    });
+}
+
+async function fetchData(position){
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    statusBox.innerText = "📍 Skin analysis based on your environment";
+
+    /* WEATHER + UV */
+    const weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,uv_index&timezone=auto`;
+    const weatherData = await fetch(weatherURL).then(r=>r.json());
+
+    const temp = weatherData.current.temperature_2m;
+    const uv = weatherData.current.uv_index;
+
+    weatherCard.innerHTML = `
+        <h3>🌡️ Temperature</h3>
+        <p class="value">${temp}°C</p>
+        <p>${temp > 35 ? "Heat → Oiliness & acne risk" :
+            temp < 20 ? "Cold → Dryness risk" :
+            "Comfortable → Balanced skin"}</p>
+        <div class="tips">
+            <strong>🧑‍⚕️ Dermatologist Tips</strong>
+            <ul>
+                <li>Hydrate internally</li>
+                <li>Use gentle cleanser</li>
+            </ul>
+        </div>
+    `;
+
+    uvCard.innerHTML = `
+        <h3>☀️ UV Index</h3>
+        <p class="value">${uv}</p>
+        <p>${uv < 3 ? "Low UV risk" :
+            uv < 6 ? "Moderate tanning risk" :
+            uv < 8 ? "Sunburn possible" :
+            "High UV damage risk"}</p>
+        <div class="tips">
+            <strong>🧑‍⚕️ Dermatologist Tips</strong>
+            <ul>
+                <li>Apply SPF 30+ sunscreen</li>
+                <li>Wear protective clothing</li>
+                <li>Consume Vitamin C & E</li>
+            </ul>
+        </div>
+    `;
+
+    /* POLLUTION */
+    const airURL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5`;
+    const airData = await fetch(airURL).then(r=>r.json());
+    const pm25 = airData.current.pm2_5;
+
+    pollutionCard.innerHTML = `
+        <h3>🌫️ Pollution</h3>
+        <p class="value">PM2.5 – ${pm25}</p>
+        <p>${pm25 < 50 ? "Clean air" :
+            pm25 < 100 ? "Moderate pollution" :
+            "High pollution exposure"}</p>
+        <div class="tips">
+            <strong>🧑‍⚕️ Dermatologist Tips</strong>
+            <ul>
+                <li>Double cleanse after outdoors</li>
+                <li>Use barrier-repair creams</li>
+                <li>Increase antioxidants</li>
+            </ul>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>

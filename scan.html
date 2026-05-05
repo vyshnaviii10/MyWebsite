@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan | AI Skin Scanner</title>
+
+<style>
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(120deg,#e9f7ff,#ffffff);
+}
+
+.header{
+    background:#0a5c75;
+    color:white;
+    padding:18px;
+    text-align:center;
+    font-size:22px;
+}
+
+.main{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:30px;
+    padding:30px;
+}
+
+.scan-box,.result-box{
+    background:white;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0px 12px 30px rgba(0,0,0,0.12);
+}
+
+.scan-box h2,.result-box h2{
+    color:#0a5c75;
+    text-align:center;
+}
+
+#preview{
+    width:100%;
+    height:260px;
+    border:2px dashed #0a5c75;
+    border-radius:15px;
+    object-fit:cover;
+    margin-bottom:15px;
+}
+
+.select-card{
+    border:1px solid #ccc;
+    border-radius:12px;
+    padding:12px;
+}
+
+.tag-input{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.tag-input input{
+    border:none;
+    outline:none;
+    flex:1;
+}
+
+.tag{
+    background:#0a5c75;
+    color:white;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+button{
+    width:100%;
+    background:#0a5c75;
+    border:none;
+    border-radius:12px;
+    color:white;
+    font-size:16px;
+    padding:14px;
+    cursor:pointer;
+    margin-top:15px;
+}
+
+button:hover{
+    background:#093d4f;
+}
+
+.risk{
+    padding:16px;
+    border-radius:14px;
+    font-size:22px;
+    color:white;
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.low{ background:#28a745; }
+.medium{ background:#f0ad4e; }
+.high{ background:#dc3545; }
+
+.confidence-box{
+    margin-bottom:15px;
+}
+
+.progress{
+    width:100%;
+    height:14px;
+    background:#e0e0e0;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    width:0%;
+    transition:width 0.6s ease;
+}
+
+.card{
+    background:#f2faff;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:12px;
+}
+
+.next-steps h3{
+    color:#0a5c75;
+    margin-bottom:10px;
+}
+
+.next-steps ul{
+    padding-left:18px;
+    line-height:1.8;
+    font-size:14.5px;
+}
+
+.next-steps li{
+    margin-bottom:4px;
+}
+
+.disclaimer-note{
+    margin-top:12px;
+    font-size:13px;
+    color:#666;
+    font-style:italic;
+}
+
+.footer{
+    background:#0a5c75;
+    color:white;
+    text-align:center;
+    padding:12px;
+    font-size:13px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Scan my Skin</div>
+
+<div style="max-width:1200px;margin:12px auto 0;padding:0 30px;">
+    <button onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+</div>
+
+<div class="main">
+
+<div class="scan-box">
+    <h2>Upload / Capture Image</h2>
+
+    <input type="file" id="upload" accept="image/*" capture="environment">
+    <img id="preview">
+
+    <div class="select-card">
+        <b>Affected Areas</b>
+        <div class="tag-input" id="tagBox">
+            <input type="text" id="areaInput" placeholder="Type affected area..." list="areaList">
+        </div>
+    </div>
+
+    <datalist id="areaList">
+        <option value="Face">
+        <option value="Neck">
+        <option value="Hand">
+        <option value="Chest">
+        <option value="Back">
+        <option value="Leg">
+        <option value="Foot">
+        <option value="Other">
+    </datalist>
+
+    <button onclick="predict()">PREDICT</button>
+</div>
+
+<div class="result-box" id="result">
+    <h2>RESULT</h2>
+    <p>Please upload an image and select affected areas.</p>
+</div>
+
+</div>
+
+<div class="footer">
+⚠ This system is not a medical diagnosis. Always consult a certified dermatologist.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script>
+let model;
+let modelLoaded = false;
+
+const MODEL_URL = "./model/model.json";
+const METADATA_URL = "./model/metadata.json";
+
+/* Disease Mapping */
+const diseaseInfo = {
+    "Acne": {
+        name: "Acne Vulgaris",
+        deficiency: "Possible Zinc & Vitamin A imbalance",
+        foods: ["Carrots","Spinach","Sweet Potatoes","Pumpkin Seeds"]
+    },
+    "Eczema": {
+        name: "Atopic Dermatitis",
+        deficiency: "Vitamin D & Omega-3 deficiency",
+        foods: ["Fish","Flaxseeds","Walnuts","Eggs"]
+    },
+    "Fungal Infection": {
+        name: "Dermatophytosis",
+        deficiency: "Low immunity, Vitamin C deficiency",
+        foods: ["Amla","Orange","Garlic","Turmeric"]
+    },
+    "Psoriasis": {
+        name: "Psoriasis",
+        deficiency: "Vitamin D deficiency",
+        foods: ["Mushrooms","Milk","Fish","Sunlight"]
+    },
+    "Vitiligo": {
+        name: "Vitiligo",
+        deficiency: "Vitamin B12 & Folic Acid deficiency",
+        foods: ["Beetroot","Leafy Greens","Banana","Dairy"]
+    },
+    "Healthy": {
+        name: "Normal Skin",
+        deficiency: "No deficiency",
+        foods: ["Balanced Diet","Fruits","Vegetables","Water"]
+    }
+};
+
+(async ()=>{
+    try{
+        model = await tmImage.load(MODEL_URL, METADATA_URL);
+        modelLoaded = true;
+    }catch(e){
+        alert("Model failed to load. Use Live Server.");
+    }
+})();
+
+const upload = document.getElementById("upload");
+const preview = document.getElementById("preview");
+
+upload.addEventListener("change", ()=>{
+    if(upload.files[0]){
+        preview.src = URL.createObjectURL(upload.files[0]);
+    }
+});
+
+let selectedAreas = [];
+const areaInput = document.getElementById("areaInput");
+const tagBox = document.getElementById("tagBox");
+
+areaInput.addEventListener("keydown", e=>{
+    if(e.key === "Enter" && areaInput.value.trim()){
+        e.preventDefault();
+        addTag(areaInput.value.trim());
+        areaInput.value = "";
+    }
+});
+
+function addTag(value){
+    if(selectedAreas.includes(value)) return;
+    selectedAreas.push(value);
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.innerText = value;
+    tagBox.insertBefore(tag, areaInput);
+}
+
+async function predict(){
+
+    if(areaInput.value.trim()){
+        addTag(areaInput.value.trim());
+        areaInput.value = "";
+    }
+
+    if(!modelLoaded){
+        alert("Model still loading.");
+        return;
+    }
+
+    if(upload.files.length === 0 || selectedAreas.length === 0){
+        alert("Upload image and select areas.");
+        return;
+    }
+
+    const predictions = await model.predict(preview);
+    predictions.sort((a,b)=>b.probability - a.probability);
+
+    const top = predictions[0];
+    const confidence = Math.round(top.probability * 100);
+
+    const info = diseaseInfo[top.className] || {
+        name: top.className,
+        deficiency: "General imbalance",
+        foods: ["Fruits","Vegetables","Water"]
+    };
+
+    let riskClass, advice, barColor;
+
+    if(confidence < 40){
+        riskClass = "low";
+        barColor = "#28a745";
+        advice = "Mild condition. Maintain hygiene.";
+    }else if(confidence < 70){
+        riskClass = "medium";
+        barColor = "#f0ad4e";
+        advice = "Observe condition and consult if needed.";
+    }else{
+        riskClass = "high";
+        barColor = "#dc3545";
+        advice = "Consult dermatologist immediately.";
+    }
+
+    document.getElementById("result").innerHTML = `
+        <div class="risk ${riskClass}">
+            ${top.className} — ${confidence}%
+        </div>
+
+        <div class="confidence-box">
+            <div class="progress">
+                <div class="progress-fill" style="width:${confidence}%;background:${barColor};"></div>
+            </div>
+        </div>
+
+        <div class="card"><b>Affected Areas:</b><br>${selectedAreas.join(", ")}</div>
+
+        <div class="card"><b>Detected Condition:</b><br>${info.name}</div>
+
+        <div class="card"><b>Possible Deficiency:</b><br>${info.deficiency}</div>
+
+        <div class="card"><b>Medical Guidance:</b><br>${advice}</div>
+
+        <div class="card next-steps">
+            <h3>🩺 What should I do next?</h3>
+            <ul>
+                <li>🧴 Use mild, fragrance-free skincare products</li>
+                <li>🚫 Avoid home remedies and online product claims</li>
+                <li>☀ Protect the affected area from sun & dust</li>
+                <li>📅 Monitor symptoms for 5–7 days</li>
+                <li>👩‍⚕ Visit a dermatologist if symptoms worsen</li>
+                <li>🥗 Include foods: ${info.foods.join(", ")}</li>
+                <li>💧 Stay hydrated</li>
+            </ul>
+            <p class="disclaimer-note">
+                ⚠ This AI system provides guidance only and is not a substitute for professional medical advice.
+            </p>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>

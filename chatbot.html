@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkinBot - Skin Health Assistant</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.chatbot-container {
+    width: 100%;
+    max-width: 500px;
+    height: 90vh;
+    max-height: 700px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, #0a5c75 0%, #0f7fa0 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.chatbot-header h1 {
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.chatbot-header p {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafb;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 8px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.user-message .bubble {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 16px;
+    max-width: 85%;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.bot-message {
+    justify-content: flex-start;
+}
+
+.bot-message .bubble {
+    background: white;
+    color: #333;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    max-width: 85%;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid #e0e6ed;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.bot-message .bubble strong {
+    color: #0a5c75;
+}
+
+.input-section {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e0e6ed;
+    display: flex;
+    gap: 10px;
+}
+
+.input-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+#messageInput {
+    width: 100%;
+    border: 1.5px solid #e0e6ed;
+    border-radius: 25px;
+    padding: 12px 16px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#messageInput:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+}
+
+.send-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    transition: 0.3s;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.send-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.send-btn:active {
+    transform: scale(0.95);
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0a5c75;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+.suggested-questions {
+    display: none;
+    padding: 12px;
+    background: #f0f4f9;
+    border-top: 1px solid #e0e6ed;
+    overflow-x: auto;
+}
+
+.suggested-btn {
+    display: inline-block;
+    background: white;
+    border: 1px solid #d0dae6;
+    border-radius: 20px;
+    padding: 8px 14px;
+    margin: 4px 4px 4px 0;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+    color: #0a5c75;
+}
+
+.suggested-btn:hover {
+    background: #e8f1f6;
+    border-color: #0a5c75;
+}
+
+/* Scrollbar styling */
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: #c0c8d4;
+    border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background: #a0a8b4;
+}
+
+@media (max-width: 600px) {
+    .chatbot-container {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="chatbot-container">
+    <div class="chatbot-header">
+        <h1>🩺 SkinBot</h1>
+        <p>Your AI Skin Health Assistant</p>
+    </div>
+    <div style="width:100%; padding:10px 18px 0;">
+        <button style="background:#0a5c75;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;" onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+    </div>
+
+    <div class="messages-container" id="messagesContainer">
+        <div class="message bot-message">
+            <div class="bubble">
+                <strong>Hello! 👋</strong><br>
+                I'm SkinBot, your friendly skin health assistant. I can help you understand skin conditions, provide care tips, and answer basic skin-related questions.<br><br>
+                What would you like to know today?
+            </div>
+        </div>
+    </div>
+
+    <div class="suggested-questions" id="suggestedQuestions">
+        <button class="suggested-btn" onclick="sendSuggestion('What causes acne?')">💧 What is acne?</button>
+        <button class="suggested-btn" onclick="sendSuggestion('How to treat dry skin?')">🧴 Dry skin help</button>
+        <button class="suggested-btn" onclick="sendSuggestion('What is eczema?')">🔴 What is eczema?</button>
+        <button class="suggested-btn" onclick="sendSuggestion('Sunscreen tips')">☀️ Sunscreen guide</button>
+        <button class="suggested-btn" onclick="sendSuggestion('What is a dermatologist?')">👨‍⚕️ Dermatologist?</button>
+        <button class="suggested-btn" onclick="sendSuggestion('How do I know my skin type?')">🔍 Skin type test</button>
+    </div>
+
+    <div class="input-section">
+        <div class="input-box">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Ask me about skin health..." 
+                onkeypress="handleKeyPress(event)"
+            >
+        </div>
+        <button class="send-btn" onclick="sendMessage()">📤</button>
+    </div>
+</div>
+
+<script>
+const messagesContainer = document.getElementById('messagesContainer');
+const messageInput = document.getElementById('messageInput');
+const suggestedQuestions = document.getElementById('suggestedQuestions');
+
+/* Greeting responses */
+const greetings = {
+    patterns: ['hello', 'hi', 'hey', 'greetings', 'howdy', 'what\'s up', 'yo'],
+    responses: [
+        'Hey there! 👋 I\'m so glad you stopped by! How can I help you with your skin today?',
+        'Hello! 😊 Welcome to SkinBot! What skin concerns can I help you with?',
+        'Hi! Great to see you! 🩺 Ready to talk about skin health? Ask me anything!',
+        'Hey! 👋 I\'m here to help with all your skin questions. What\'s on your mind?'
+    ]
+};
+
+const howareyou = {
+    patterns: ['how are you', 'how\'re you', 'how u doing', 'how you been'],
+    responses: [
+        'I\'m doing great, thanks for asking! 😊 I\'m here and ready to help you with skin care tips and advice. How are YOU doing?',
+        'I\'m doing wonderful! 🌟 Thanks for asking! Now, let\'s talk about YOUR skin health. What can I help with?',
+        'I\'m in perfect condition! 🤖 More importantly, how\'s your skin feeling? Any concerns I can help with?'
+    ]
+};
+
+const whatareyoudoing = {
+    patterns: ['what are you doing', 'what you doing', 'what\'re you doing', 'what\'s up with you'],
+    responses: [
+        'I\'m here helping people like you learn about skin health! 🩺 Right now, I\'m ready to answer any of your skin questions. What would you like to know?',
+        'I\'m your personal skin health assistant! 💬 My job is to explain skin conditions and give you simple, easy-to-understand care tips. Got any questions?',
+        'I\'m busy being the best skin health assistant I can be! 🌟 I answer questions about skin care, conditions, and healthy skin habits. What can I help you with today?'
+    ]
+};
+
+/* Knowledge base for skin-related questions */
+const skinKnowledge = {
+    'acne': {
+        patterns: ['acne', 'pimple', 'breakout', 'spots'],
+        response: '<strong>About Acne:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What it means:</strong> Acne = pimples and spots caused by excess oil (sebum) and dead skin cells blocking your pores. When bacteria grows in these clogged pores, you get red, painful bumps.</span><br><br><strong>Common Causes:</strong><br>• Hormones (especially during puberty or menstrual cycle)<br>• Excess oil production in your skin<br>• Bacteria buildup<br>• Dead skin cells not shedding properly<br>• Certain foods and stress (for some people)<br><br><strong>Care Tips:</strong><br>• Wash face twice daily with mild soap<br>• Don\'t squeeze or pick at pimples (can leave scars)<br>• Use gentle, oil-free products<br>• Try products with salicylic acid or benzoyl peroxide (these fight acne)<br>• Keep pillowcase clean<br>• Avoid touching your face<br>• Consult a skin doctor for persistent acne<br><br>💡 Mild acne usually goes away with good skincare. Severe acne may need medicine from a doctor.'
+    },
+    'eczema': {
+        patterns: ['eczema', 'atopic dermatitis', 'itchy skin', 'inflamed skin'],
+        response: '<strong>About Eczema (Itchy Skin Condition):</strong><br>Eczema makes your skin itchy, red, and uncomfortable. It\'s caused by a weak protective outer layer. Good news: it\'s NOT contagious!<br><br><strong>Simple Care Tips:</strong><br>• Use creamy moisturizer every day, especially right after showering<br>• Take warm (not hot) showers<br>• Wear soft cotton clothing<br>• Avoid harsh soaps and strong detergents<br>• Try to identify and avoid triggers (stress, certain foods, weather)<br>• See a skin doctor if it gets worse<br><br>Keep your skin hydrated and protected!'
+    },
+    'dry skin': {
+        patterns: ['dry skin', 'dehydrated', 'flaky skin', 'itchy dry'],
+        response: '<strong>Fixing Dry Skin (Flaky & Tight Feeling):</strong><br>Dry skin is when your skin doesn\'t have enough moisture. It can feel tight, flaky, and uncomfortable.<br><br><strong>Daily Tips:</strong><br>• Use gentle, creamy cleanser (avoid harsh soaps)<br>• Apply moisturizer right after showering while skin is still damp<br>• Use a humidifier, especially in winter<br>• Drink plenty of water throughout the day<br>• Avoid extremely hot showers and long baths<br><br><strong>Products That Help:</strong><br>• Moisturizing serums that plump skin<br>• Rich face creams<br>• Face oils or heavy moisturizers<br>• Gentle scrubs once a week (don\'t overdo it)'
+    },
+    'oily skin': {
+        patterns: ['oily skin', 'greasy face', 'shiny skin', 'excess oil'],
+        response: '<strong>Managing Oily Skin (Shiny & Greasy):</strong><br>Oily skin means your skin makes too much natural oil, making it shiny and prone to breakouts.<br><br><strong>Simple Routine:</strong><br>• Wash your face twice daily with a gentle cleanser<br>• Use oil-free moisturizer (yes, even oily skin needs moisture!)<br>• Use blotting papers during the day to remove excess oil<br>• Choose makeup that won\'t clog pores<br>• Gently scrub 2-3 times per week<br>• Avoid touching your face (transfers bacteria)<br>• Try products with salicylic acid (helps clear pores)<br>• Drink plenty of water and manage stress'
+    },
+    'sunscreen': {
+        patterns: ['sunscreen', 'sun protection', 'spf', 'uv protection'],
+        response: '<strong>Sunscreen Essentials (Protect from Sun Damage):</strong><br>Sunscreen protects your skin from harmful sun rays that cause aging, dark spots, and skin cancer.<br><br><strong>How to Use It Right:</strong><br>• Use SPF 30 or higher every single day (even cloudy days!)<br>• Apply about 1 teaspoon to your face<br>• Reapply every 2 hours or after swimming<br>• Put it on 15 minutes before going outside<br><br><strong>Types of Sunscreen:</strong><br>• Physical sunscreen (zinc oxide, titanium dioxide) - sits on top of skin, gentler for sensitive skin<br>• Chemical sunscreen - absorbs into skin, lighter feeling<br><br><strong>Remember:</strong><br>• Use it year-round, not just in summer<br>• It\'s the most important anti-aging product you can use!'
+    },
+    'sensitive skin': {
+        patterns: ['sensitive skin', 'sensitive', 'irritation', 'redness', 'reaction'],
+        response: '<strong>Caring for Sensitive Skin (Gets Red & Irritated Easily):</strong><br>Sensitive skin reacts quickly to products and changes in weather. Your skin is just extra reactive!<br><br><strong>Simple Tips:</strong><br>• Use products labeled "fragrance-free" and "hypoallergenic" (easy to tolerate)<br>• Try new products on a small area first to test them<br>• Avoid strong perfumes and harsh chemicals<br>• Use lukewarm (not hot) water to wash<br>• Keep your routine simple - fewer products = less irritation<br>• Don\'t over-scrub or over-exfoliate your skin<br>• Look for products that say "for sensitive skin"<br><br><strong>Avoid These Irritants:</strong><br>• Strong fragrances and other heavy chemicals<br>• Products with lots of alcohol<br>• Extra ingredients you don\'t need'
+    },
+    'psoriasis': {
+        patterns: ['psoriasis', 'thick patches', 'scaly skin'],
+        response: '<strong>About Psoriasis (Thick, Scaly Patches):</strong><br>Psoriasis is a condition from your immune system that causes thick, scaly, red patches on skin. Good news: it\'s NOT contagious!<br><br><strong>Things That Help:</strong><br>• Moisturize your skin regularly<br>• Take warm (not hot) baths<br>• Try to reduce stress (stress can make it worse)<br>• Use gentle skincare products<br>• Get some sunshine (helps many people)<br><br>⚠️ Important: Psoriasis needs professional help! See a skin doctor for proper treatment options.'
+    },
+    'aging': {
+        patterns: ['wrinkles', 'fine lines', 'anti-aging', 'aging skin', 'age spots'],
+        response: '<strong>Skincare for Aging Skin (Keeping Skin Young-Looking):</strong><br>Aging is natural, but good skincare helps keep your skin looking healthy and vibrant!<br><br><strong>Ingredients That Work:</strong><br>• Retinol (vitamin A) - reduces wrinkles and makes skin fresher<br>• Vitamin C - brightens dark spots and protects skin<br>• Hyaluronic acid - plumps skin and reduces fine lines<br>• Peptides - helps skin stay firm<br><br><strong>Daily Habits That Help:</strong><br>• Sunscreen is THE most important (prevents further damage)<br>• Keep skin well-moisturized<br>• Get enough sleep (skin repairs at night)<br>• Stay hydrated by drinking water<br>• Eat healthy foods with antioxidants<br>• Exercise and manage stress'
+    },
+    'rash': {
+        patterns: ['rash', 'hives', 'outbreak', 'red bumps'],
+        response: '<strong>About Skin Rashes (Red Bumpy Areas):</strong><br>Rashes happen for many reasons: allergies, infections, irritation from products, or medical conditions.<br><br><strong>What You Can Do Right Now:</strong><br>• Don\'t scratch! (scratching makes it worse and can cause infection)<br>• Use a cool, damp cloth to calm the skin<br>• Wear soft, breathable clothes<br>• Figure out what caused it and avoid it<br>• Use simple, fragrance-free products<br><br><strong>See a Doctor If:</strong><br>• Rash spreads to other areas<br>• It gets worse or more painful<br>• It lasts more than 2 weeks<br>• You see blisters, pus, or oozing<br>• You have fever or pain<br><br>⚠️ Serious rashes need professional help!'
+    },
+    'makeup': {
+        patterns: ['makeup', 'foundation', 'cosmetics', 'makeup removal'],
+        response: '<strong>Makeup & Skin Health (Keep Skin Healthy While Using Makeup):</strong><br><br><strong>Before Bed - This Is Important!</strong><br>• Always remove all makeup before sleeping (even if tired!)<br>• Use makeup remover or oil cleanser first<br>• Follow with your regular face cleanser<br>• Never sleep in makeup<br><br><strong>Choosing Makeup Products:</strong><br>• Look for "non-comedogenic" on the label (won\'t clog pores)<br>• Test products on a small area first<br>• Choose products for your skin type<br>• Check expiration dates (old makeup can cause problems)<br><br><strong>Daily Tips:</strong><br>• Use clean brushes and sponges<br>• Don\'t touch your face with dirty hands<br>• Don\'t share makeup with others<br>• Replace brushes and sponges monthly'
+    },
+    'routine': {
+        patterns: ['skincare routine', 'routine', 'daily care', 'step'],
+        response: '<strong>Basic Daily Skincare Routine (Step by Step):</strong><br><br><strong>Morning (Quick Routine):</strong><br>1️⃣ Cleanser - wash your face<br>2️⃣ Moisturizer - hydrate your skin<br>3️⃣ Sunscreen SPF 30+ - protect from sun<br><br><strong>Evening (Before Bed):</strong><br>1️⃣ Makeup remover - only if you wore makeup<br>2️⃣ Cleanser - remove dirt and oil<br>3️⃣ Night moisturizer - heavier formula for overnight<br><br><strong>Optional Add-Ons (If You Want):</strong><br>• Serums or treatments for specific concerns<br>• Face masks once a week<br>• Gentle scrub 2-3 times per week<br><br>💡 Start simple with just cleanser, moisturizer, and sunscreen. Add more later if needed!'
+    },
+    'blackheads': {
+        patterns: ['blackhead', 'whitehead', 'comedone', 'clogged pore'],
+        response: '<strong>About Blackheads & Whiteheads:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What they mean:</strong> Blackheads and whiteheads = clogged pores where oil and dead skin cells get stuck. Blackheads are open (dark color from oxidation), whiteheads are closed.</span><br><br><strong>How to Prevent Them:</strong><br>• Wash face twice a day<br>• Use exfoliants 2-3 times per week (gently)<br>• Use products with salicylic acid to unclog pores<br>• Don\'t squeeze them (can cause scars)<br>• Keep hair and fingers away from face<br><br><strong>Treatment:</strong><br>• Gentle exfoliating cleansers<br>• Clay masks once a week<br>• Salicylic acid products<br>• Visit a dermatologist for professional extraction<br><br>💡 Consistency is key! Takes 4-6 weeks to see improvement.'
+    },
+    'dandruff': {
+        patterns: ['dandruff', 'scalp', 'flaky scalp', 'itchy scalp'],
+        response: '<strong>About Dandruff (Flaky White Scalp):</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What it means:</strong> Dandruff = dead skin cells from your scalp shedding as white or yellow flakes. Caused by dry scalp, fungus, or irritation.</span><br><br><strong>Simple Solutions:</strong><br>• Use medicated shampoo (look for zinc pyrithione or ketoconazole)<br>• Wash hair 2-3 times per week (not daily)<br>• Use lukewarm water (hot water dries scalp)<br>• Gently massage scalp while shampooing<br>• Try tea tree oil shampoos (natural option)<br>• Manage stress<br>• Get sunlight exposure<br><br><strong>When to See a Doctor:</strong><br>• Dandruff doesn\'t improve after 2 weeks<br>• Scalp becomes very red or painful<br>• You have severe itching or hair loss'
+    },
+    'body acne': {
+        patterns: ['body acne', 'back acne', 'chest acne', 'butt acne', 'folliculitis'],
+        response: '<strong>About Body & Back Acne:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What it means:</strong> Body acne = pimples on chest, back, shoulders, or butt. Usually caused by sweat, friction from tight clothes, and bacteria.</span><br><br><strong>Prevention Tips:</strong><br>• Wear loose, breathable cotton clothing<br>• Shower right after exercise or sweating<br>• Use acne-fighting body wash with salicylic acid<br>• Don\'t wear tight backpacks or tight clothes<br>• Wash bed sheets and towels regularly<br>• Avoid heavy lotions after sweating<br><br><strong>Treatment:</strong><br>• Body acne products with salicylic acid<br>• Benzoyl peroxide washes<br>• Exfoliate gently 2-3 times per week<br>• Keep area dry and clean<br><br>💡 Body acne responds well to salicylic acid and benzoyl peroxide.'
+    },
+    'fungal': {
+        patterns: ['fungal', 'fungus', 'yeast', 'infection', 'tinea', 'ringworm'],
+        response: '<strong>About Fungal Skin Infections:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What it means:</strong> Fungal = skin problem from fungus (like yeast/mold). Examples: athlete\'s foot, ringworm (it\'s a fungus, not a worm!), jock itch.</span><br><br><strong>Common Signs:</strong><br>• Red, circular patches or rings<br>• Itching and burning<br>• Scaling or cracking skin<br>• Discolored nails<br><br><strong>Prevention:</strong><br>• Keep area clean and dry<br>• Wear breathable clothes<br>• Use anti-fungal powder in warm areas<br>• Don\'t share towels or personal items<br>• Wear clean socks<br>• Avoid walking barefoot in public areas<br><br><strong>At-Home Treatment:</strong><br>• Anti-fungal creams (miconazole, tolnaftate)<br>• Anti-fungal shampoos for scalp<br><br>⚠️ Serious fungal infections need a doctor!'
+    },
+    'moles': {
+        patterns: ['mole', 'birthmark', 'brown spot', 'pigmentation'],
+        response: '<strong>About Moles & Birthmarks:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What they are:</strong> Moles = clusters of pigment cells (melanin) creating brown spots. Most are harmless. Birthmarks present from birth, moles appear later.</span><br><br><strong>Monitor Moles With ABCDE Rule:</strong><br>• <strong>A</strong>symmetry - Sides don\'t match<br>• <strong>B</strong>order - Irregular, jagged edges<br>• <strong>C</strong>olor - Multiple colors or uneven<br>• <strong>D</strong>iameter - Larger than pencil eraser<br>• <strong>E</strong>volving - Changing size, shape, or color<br><br><strong>When to See Doctor:</strong><br>• Mole shows any ABCDE signs<br>• Mole starts itching or bleeding<br>• Mole changes appearance<br>• You\'re concerned about it<br><br>💡 Most moles are benign (harmless). Regular checks are good!'
+    },
+    'early aging': {
+        patterns: ['prevent wrinkles', 'fine lines', 'early aging', 'young skin'],
+        response: '<strong>Preventing Wrinkles Early:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>Key Fact:</strong> Prevention is MUCH easier than fixing wrinkles later! Start now for better results.</span><br><br><strong>Best Prevention Habits:</strong><br>• Use sunscreen daily SPF 30+ (UV causes 80% of wrinkles!)<br>• Moisturize every day<br>• Drink plenty of water<br>• Sleep 7-9 hours per night (skin repairs while sleeping)<br>• Don\'t smoke or drink excess alcohol<br>• Manage stress<br>• Eat foods with antioxidants (berries, green tea, dark chocolate)<br><br><strong>Anti-Aging Ingredients to Add Later:</strong><br>• Retinol (vitamin A) - prevents fine lines<br>• Vitamin C - brightens and protects<br>• Hyaluronic acid - keeps skin plump<br>• Niacinamide - strengthens skin<br><br>💡 Start with basics: sunscreen, moisturizer, and healthy habits!'
+    },
+    'hormonal acne': {
+        patterns: ['hormonal acne', 'period acne', 'chin acne', 'jawline'],
+        response: '<strong>About Hormonal Acne:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>What it means:</strong> Hormonal acne = breakouts from hormone changes. Usually on chin, jawline, and neck. Common before period, during puberty, or pregnancy.</span><br><br><strong>Why It Happens:</strong><br>• Hormones increase oil production<br>• Oil-producing glands become more active<br>• Appears 1-2 weeks before period<br>• Stress hormones can trigger it<br><br><strong>Management Tips:</strong><br>• Track your cycle to predict breakouts<br>• Intensify skincare before period<br>• Use acne products (salicylic acid, benzoyl peroxide)<br>• Stay consistent with routine<br>• Reduce stress through exercise<br>• Eat less sugar and processed food<br>• Consider hormonal birth control (ask doctor)<br><br>💡 Usually improves in 6-8 weeks with consistent treatment!'
+    },
+    'skin type': {
+        patterns: ['skin type', 'what is my skin type', 'identify skin'],
+        response: '<strong>Understanding Your Skin Type:</strong><br><span style="color: #666; font-size: 13px;">📚 <strong>Important:</strong> Knowing your type helps pick RIGHT products for YOUR skin!</span><br><br><strong>The 5 Main Skin Types:</strong><br><br><strong>1️⃣ OILY:</strong> Shiny (especially T-zone), prone to acne. Use oil-free products.<br><strong>2️⃣ DRY:</strong> Tight, flaky, rough. Use hydrating, creamy products.<br><strong>3️⃣ COMBINATION:</strong> Oily T-zone + dry cheeks (most common). Use balancing products.<br><strong>4️⃣ NORMAL:</strong> Balanced, not too oily or dry. Simple routine works.<br><strong>5️⃣ SENSITIVE:</strong> Gets irritated easily. Use fragrance-free, minimal products.<br><br><strong>How to Test Your Type:</strong><br>• Wash face, wait 30 minutes<br>• Look in mirror in natural light<br>• Check if shiny (oily), tight (dry), or balanced (normal/combination)<br><br>💡 Your skin type can change with age, season, or climate!'
+    },
+    'hacks': {
+        patterns: ['hack', 'tip', 'trick', 'home remedy', 'diy', 'remedy'],
+        response: '<strong>Skin Care Hacks & Natural Remedies:</strong><br><br><strong>Simple Home Treatments:</strong><br>• Ice cubes on acne - reduces redness (5-10 min)<br>• Honey mask - natural antibacterial (15 min, 1-2× per week)<br>• Green tea bags - antioxidants (steep, let cool, apply)<br>• Aloe vera - soothes and speeds healing<br>• Rose water - gentle toner<br>• Coconut oil - moisturizer (but can clog pores for some)<br><br><strong>Daily Habits That Help:</strong><br>• Change pillowcase 2-3 times per week<br>• Don\'t touch your face (hands transfer bacteria)<br>• Clean phone screen regularly<br>• Wash hands before touching face<br>• Drink 8-10 glasses water daily<br>• Sleep 7-9 hours per night<br>• Exercise for better circulation<br>• Reduce salt and sugar<br><br><strong>Product Hacks:</strong><br>• Pimple patches - absorb fluid overnight<br>• Spot treatment before sleep - works while resting<br>• Facial mist - quick hydration and refresh<br>• Blotting papers - remove oil without messing makeup<br><br>💡 Natural ≠ always safe! Patch test everything first.'
+    }
+};
+
+/* Medical terms glossary - explained in simple language */
+const medicalGlossary = {
+    'dermatologist': 'A doctor who specializes in treating skin, hair, and nails. Think of them as a skin specialist.',
+    'epidermis': 'The outermost layer of your skin that you can see and touch.',
+    'dermis': 'The layer under your epidermis that contains nerves, blood vessels, and collagen (makes skin firm).',
+    'sebum': 'Natural oil produced by your skin glands. Too much makes skin oily, too little makes it dry.',
+    'sebaceous gland': 'Tiny glands in your skin that produce sebum (skin oil).',
+    'collagen': 'A protein in your skin that keeps it firm and elastic. It decreases with age.',
+    'pore': 'A tiny opening in your skin that releases oil and sweat.',
+    'comedone': 'A clogged pore. A "blackhead" is an open comedone, a "whitehead" is a closed one.',
+    'non-comedogenic': 'Products labeled this way won\'t clog your pores.',
+    'inflammation': 'Redness, swelling, and heat on skin. It\'s your body\'s way of fighting irritation or infection.',
+    'bacterial': 'Related to bacteria, which are tiny living organisms. Some cause skin problems.',
+    'fungal': 'Related to fungus, like yeast or mold. Some fungi cause skin infections.',
+    'keratin': 'A protein that makes up the outer layer of your skin and protects it.',
+    'melanin': 'The pigment that gives your skin its color. Too much sun exposure increases melanin damage.',
+    'uv rays': 'Invisible rays from the sun that can damage your skin and cause aging and cancer.',
+    'antioxidant': 'Substances that protect skin from damage caused by free radicals (harmful molecules).',
+    'exfoliate': 'To gently remove dead skin cells from the surface of your skin.',
+    'hyaluronic acid': 'A substance that holds water in your skin to keep it hydrated and plump.',
+    'retinol': 'A form of vitamin A that reduces wrinkles and improves skin texture.',
+    'salicylic acid': 'A chemical that cleans out clogged pores and helps with acne.',
+    'benzoyl peroxide': 'A treatment that kills acne-causing bacteria and helps prevent breakouts.',
+    'ceramide': 'A type of fat that keeps your skin\'s moisture barrier healthy.',
+    'moisturize': 'To add water and oils to your skin to keep it hydrated.',
+    'hydration': 'The amount of water in your skin. Well-hydrated skin looks plump and healthy.',
+    'barrier': 'The outermost protective layer of your skin that keeps moisture in and irritants out.',
+    'irritant': 'Anything that makes your skin red, itchy, or uncomfortable.',
+    'allergen': 'Something that causes an allergic reaction. Can make skin itch, swell, or break out.',
+    'sensitive skin': 'Skin that reacts easily to products, weather, or other irritants.',
+    'rosacea': 'A skin condition causing persistent redness and sometimes acne-like bumps on the face.',
+    'psoriasis': 'An autoimmune condition causing thick, scaly patches on skin (not contagious).',
+    'eczema': 'A skin condition causing itching, redness, and inflammation. Also called atopic dermatitis.',
+    'atopic dermatitis': 'Medical name for eczema - a chronic itchy skin condition.',
+    'viral': 'Related to viruses. Some viruses cause skin conditions.',
+    'contagious': 'Able to spread from one person to another.',
+    'spf': 'Sun Protection Factor - a rating showing how well sunscreen blocks UV rays. Higher number = more protection.',
+    'uva/uvb': 'Different types of UV rays. Both can damage skin, so use "broad spectrum" sunscreen.',
+    'oxidation': 'A chemical process that damages skin cells and causes aging.',
+    'free radicals': 'Harmful molecules created by sun exposure and pollution that damage skin.',
+    'cell turnover': 'How quickly your body replaces old skin cells with new ones.',
+    'seborrheic keratosis': 'Harmless brown spots that appear as you age. They\'re just overgrowth of skin cells.',
+    'hyperpigmentation': 'Dark spots or patches on skin from too much melanin in certain areas.',
+    'temporary': 'Something that doesn\'t last forever - will go away on its own.',
+    'chronic': 'Something that lasts a long time or keeps coming back.',
+    'acute': 'Something that appears suddenly and is usually short-term.',
+    'pore': 'Tiny opening in your skin where oil and sweat come out.',
+    'blackhead': 'Open clogged pore where the oil oxidizes and turns dark.',
+    'whitehead': 'Closed clogged pore trapping oil underneath the skin.',
+    'comedone': 'Medical term for blackhead or whitehead (clogged pore).',
+    'exfoliate': 'Gently remove dead skin cells from the surface.',
+    'follicle': 'Tiny pocket in skin where hair grows and oil is produced.',
+    'sebaceous gland': 'Gland in your skin that produces oil (sebum).',
+    'breakout': 'Sudden appearance of multiple pimples/acne.',
+    'flare up': 'Sudden worsening of a skin condition.',
+    'inflammation': 'Redness, swelling, and heat when skin is irritated or infected.',
+    'irritant': 'Anything that makes your skin red, itchy, or uncomfortable.',
+    'allergen': 'Something that causes allergic reaction - makes skin itch, swell, or break out.',
+    'sensitivity': 'How easily your skin reacts to products or environmental factors.',
+    'barrier': 'Outermost protective layer of skin keeping moisture in and irritants out.',
+    'hydration': 'Amount of water in your skin. Well-hydrated = plump, healthy skin.',
+    'moisturize': 'Add water and oils to skin to keep it hydrated.',
+    'oxidation': 'Chemical process where oil darkens when exposed to air.',
+    'bacterial': 'Related to bacteria - tiny organisms. Some cause skin problems.',
+    'fungal': 'Related to fungus like yeast or mold. Some fungi cause skin infections.',
+    'viral': 'Related to viruses. Some viruses cause skin conditions.',
+    'contagious': 'Able to spread from one person to another through contact.',
+    'non-toxic': 'Not poisonous or harmful to your body.',
+    'hypoallergenic': 'Less likely to cause allergic reactions.',
+    'fragrance-free': 'No added scents or perfumes (better for sensitive skin).',
+    'phenol': 'Chemical used in some acne treatments.',
+    'peroxide': 'Chemical compound used to kill bacteria (benzoyl peroxide).',
+    'acid': 'Chemical that helps remove dead skin cells (salicylic, glycolic).',
+    'enzyme': 'Protein that breaks down oils and dead skin cells.',
+    'peptide': 'Amino acid chains that help skin stay firm.',
+    'collagen': 'Protein in skin that keeps it firm and elastic. Decreases with age.',
+    'elastin': 'Protein that gives skin flexibility and ability to bounce back.',
+    'melanin': 'Pigment that gives skin its color. Excess from sun damage causes dark spots.',
+    'sun damage': 'Skin harm from UV rays - causes aging, spots, and cancer risk.',
+    'photoaging': 'Premature skin aging from sun exposure.',
+    'uv rays': 'Invisible sun rays that damage skin. UVA causes aging, UVB causes burns.',
+    'spf': 'Sun Protection Factor - higher number = more UV protection.',
+    'broad spectrum': 'Sunscreen protecting against both UVA and UVB rays.',
+    'dermatology': 'Medical specialty dealing with skin, hair, and nails.',
+    'topical': 'Applied directly to skin (creams, lotions, serums).',
+    'systemic': 'Affects whole body - taken orally (pills, tablets).',
+    'anti-inflammatory': 'Reduces swelling and redness.',
+    'antibacterial': 'Kills or stops growth of bacteria.',
+    'antifungal': 'Kills or stops growth of fungus.',
+    'antioxidant': 'Protects skin from damage by free radicals caused by sun/pollution.',
+    'free radical': 'Harmful molecule created by sun/pollution that damages skin cells.',
+    'cell turnover': 'How fast your body replaces old skin cells with new healthy ones.',
+    'keratin': 'Protein making up outer skin layer that protects.',
+    'lipid': 'Natural oil/fat in skin that maintains moisture barrier.',
+    'hyaluronic acid': 'Natural substance holding water in skin - keeps it plump and hydrated.',
+    'glycerin': 'Humectant that draws water into skin for hydration.',
+    'retinol': 'Form of vitamin A that reduces wrinkles and improves skin.',
+    'retinoid': 'Class of vitamin A products (retinol, tretinoin, adapalene).',
+    'vitamin c': 'Antioxidant that brightens skin and protects from sun damage.',
+    'niacinamide': 'Form of vitamin B3 that strengthens skin and regulates oil.',
+    'salicylic acid': 'Beta hydroxy acid that gets inside pores to fight acne.',
+    'glycolic acid': 'Alpha hydroxy acid that exfoliates surface dead skin cells.',
+    'benzoyl peroxide': 'Treatment that kills acne bacteria - very effective.',
+    'azelaic acid': 'Reduces redness and pigmentation - good for rosacea/acne.',
+    'tranexamic acid': 'Helps fade dark spots and even skin tone.',
+    'hydroquinone': 'Skin lightener used for dark spots and hyperpigmentation.',
+    'ceramide': 'Type of fat that keeps moisture barrier healthy.',
+    'allantoin': 'Ingredient that soothes and heals skin.',
+    'sulfate': 'Harsh cleanser ingredient that can irritate skin.',
+    'paraben': 'Preservative in products - some people sensitive to it.',
+    'phthalate': 'Chemical in fragrances and plastics - potential endocrine disruptor.',
+    'phenoxyethanol': 'Preservative used in products - similar function to parabens.'
+};
+
+/* Send message function */
+function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    // Add user message
+    addMessage(message, 'user');
+    messageInput.value = '';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Get bot response
+    setTimeout(() => {
+        const response = getBotResponse(message);
+        removeTypingIndicator();
+        addMessage(response, 'bot');
+        
+        // Hide suggested questions after first interaction
+        suggestedQuestions.style.display = 'none';
+    }, 1000);
+}
+
+/* Get bot response based on user input */
+function getBotResponse(userMessage) {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Check for greetings first
+    for (const pattern of greetings.patterns) {
+        if (lowerMessage.includes(pattern)) {
+            const randomGreeting = greetings.responses[Math.floor(Math.random() * greetings.responses.length)];
+            return randomGreeting;
+        }
+    }
+    
+    // Check for "how are you" variations
+    for (const pattern of howareyou.patterns) {
+        if (lowerMessage.includes(pattern)) {
+            const randomResponse = howareyou.responses[Math.floor(Math.random() * howareyou.responses.length)];
+            return randomResponse;
+        }
+    }
+    
+    // Check for "what are you doing" variations
+    for (const pattern of whatareyoudoing.patterns) {
+        if (lowerMessage.includes(pattern)) {
+            const randomResponse = whatareyoudoing.responses[Math.floor(Math.random() * whatareyoudoing.responses.length)];
+            return randomResponse;
+        }
+    }
+    
+    // Check medical glossary for terms
+    for (const [term, explanation] of Object.entries(medicalGlossary)) {
+        if (lowerMessage.includes(term)) {
+            return `<strong>"${term}" explained simply:</strong><br><br>${explanation}<br><br>Hope that makes sense! 😊 Do you have any other questions about skin health?`;
+        }
+    }
+    
+    // Check each topic in knowledge base
+    for (const [topic, data] of Object.entries(skinKnowledge)) {
+        for (const pattern of data.patterns) {
+            if (lowerMessage.includes(pattern)) {
+                return data.response;
+            }
+        }
+    }
+    
+    // Default response if no match found
+    return '🤔 That\'s a great question! I don\'t have specific information about that topic.<br><br><strong>Here are some things I can help with:</strong><br>• Acne & breakouts<br>• Blackheads & whiteheads<br>• Dry or oily skin<br>• Eczema & psoriasis<br>• Sensitive skin care<br>• Rashes & infections<br>• Body/back acne<br>• Fungal infections<br>• Dandruff & scalp issues<br>• Moles & birthmarks<br>• Scars & scarring<br>• Anti-aging & wrinkles<br>• Hormonal acne<br>• Makeup & skin health<br>• Sunscreen tips<br>• Skincare routines<br>• Skin types<br>• Natural remedies & hacks<br><br><strong>You can also ask me about skin terms like:</strong><br>dermatologist, melanin, collagen, retinol, SPF, sensitivity, etc.<br><br>Or ask general questions like:<br>"Hi!", "How are you?", "What are you doing?"<br><br>Feel free to ask about any skin-related concern in simple words!<br><br>⚠️ For serious skin issues or medical concerns, always consult a real dermatologist (skin doctor).';
+}
+
+/* Add message to chat */
+function addMessage(text, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = text;
+    
+    messageDiv.appendChild(bubble);
+    messagesContainer.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+/* Show typing indicator */
+function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot-message';
+    typingDiv.id = 'typingIndicator';
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    
+    typingDiv.appendChild(bubble);
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+/* Remove typing indicator */
+function removeTypingIndicator() {
+    const typing = document.getElementById('typingIndicator');
+    if (typing) typing.remove();
+}
+
+/* Handle suggested questions */
+function sendSuggestion(question) {
+    messageInput.value = question;
+    sendMessage();
+}
+
+/* Handle Enter key */
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+/* Focus input on load */
+messageInput.focus();
+</script>
+
+</body>
+</html>

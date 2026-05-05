@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermaScan – Intelligent Skin Health System</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #e3f6fb, #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    width: 380px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 35px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+h1 {
+    color: #0a5c75;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.gender-box {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.gender-box label {
+    font-size: 14px;
+    color: #333;
+}
+
+button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #0a5c75;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #08495f;
+}
+
+.footer {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>DermaScan</h1>
+    <p class="subtitle">An Intelligent Skin Health Awareness System</p>
+
+    <input id="email" type="email" placeholder="Enter your email" required>
+    <input id="password" type="password" placeholder="Enter your password" required>
+
+    <div class="gender-box">
+        <label><input type="radio" name="gender" value="Male"> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+    </div>
+
+    <input id="age" type="number" placeholder="Enter your age" min="1" max="120">
+
+    <button onclick="login()">Login & Continue</button>
+
+    <div class="footer">
+        Secure • Private • Medical-aware
+    </div>
+</div>
+
+<!-- Firebase Logic -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCr8IMlw4vWO-a4VOFGdiisFWk46pzO8JA",
+  authDomain: "login-derma.firebaseapp.com",
+  projectId: "login-derma",
+  storageBucket: "login-derma.firebasestorage.app",
+  messagingSenderId: "919518863796",
+  appId: "1:919518863796:web:7f4ce6cc6bd35182a212e1"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.login = async function () {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const age = document.getElementById("age").value;
+    const gender = document.querySelector('input[name="gender"]:checked')?.value;
+
+    if (!email || !password || !age || !gender) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCred.user;
+
+        await setDoc(doc(db, "users", user.uid), {
+            email,
+            age,
+            gender,
+            createdAt: new Date(),
+            skinRisk: "Not Scanned"
+        });
+
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            window.location.href = "dashboard.html";
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>
